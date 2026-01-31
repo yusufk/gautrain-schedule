@@ -1,6 +1,7 @@
-/* Gautrain Brand Colors */
+/* Gautrain Brand Colors - Blue & Gold Theme */
 :root {
-  --gautrain-green: #00a651;
+  --gautrain-blue: #003e7e;
+  --gautrain-blue-light: #0066cc;
   --gautrain-gold: #ffb81c;
   --gautrain-dark: #1a1a1a;
   --gautrain-gray: #333333;
@@ -10,7 +11,7 @@
   --text-secondary: #666666;
   --border-color: #e0e0e0;
   --shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  --shadow-hover: 0 4px 16px rgba(0, 166, 81, 0.2);
+  --shadow-hover: 0 4px 16px rgba(0, 62, 126, 0.2);
 }
 
 * {
@@ -21,26 +22,40 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: linear-gradient(135deg, #f5f5f5 0%, #e8f5e9 100%);
+  background: linear-gradient(135deg, #f5f5f5 0%, #e3f2fd 100%);
 }
 
 /* Header */
 .app-header {
-  background: linear-gradient(135deg, var(--gautrain-green) 0%, #008c44 100%);
+  background: linear-gradient(135deg, var(--gautrain-blue) 0%, var(--gautrain-blue-light) 100%);
   color: white;
   padding: 2rem 1rem;
   text-align: center;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-bottom: 4px solid var(--gautrain-gold);
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.gautrain-logo {
+  height: auto;
+  width: 140px;
+  max-width: 140px;
+  object-fit: contain;
 }
 
 .app-header h1 {
   margin: 0;
   font-size: 2rem;
   font-weight: 700;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
+  color: var(--gautrain-gold);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .app-header p {
@@ -66,6 +81,64 @@
   box-shadow: var(--shadow);
   margin-bottom: 2rem;
   border: 1px solid var(--border-color);
+  border-top: 3px solid var(--gautrain-gold);
+}
+
+/* Line Selector */
+.line-selector {
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.line-selector label {
+  display: block;
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.5rem;
+}
+
+.line-select {
+  width: 100%;
+  padding: 0.875rem 1rem;
+  border: 2px solid var(--gautrain-blue);
+  border-radius: 12px;
+  font-size: 1rem;
+  background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+  color: var(--text-primary);
+  cursor: pointer;
+  transition: all 0.2s;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23003e7e' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  padding-right: 3rem;
+  font-weight: 600;
+}
+
+.line-select:focus {
+  outline: none;
+  border-color: var(--gautrain-blue-light);
+  box-shadow: 0 0 0 3px rgba(0, 62, 126, 0.15);
+}
+
+.line-select:hover {
+  background: linear-gradient(135deg, #bbdefb 0%, #90caf9 100%);
+  border-color: var(--gautrain-blue-light);
+}
+
+.line-note {
+  margin: 0.75rem 0 0;
+  padding: 0.75rem 1rem;
+  background: #fff8e1;
+  border-left: 3px solid var(--gautrain-gold);
+  border-radius: 4px;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
 }
 
 /* Route Selection */
@@ -110,12 +183,12 @@
 
 .station-select:focus {
   outline: none;
-  border-color: var(--gautrain-green);
-  box-shadow: 0 0 0 3px rgba(0, 166, 81, 0.1);
+  border-color: var(--gautrain-blue);
+  box-shadow: 0 0 0 3px rgba(0, 62, 126, 0.1);
 }
 
 .station-select:hover {
-  border-color: var(--gautrain-green);
+  border-color: var(--gautrain-blue);
 }
 
 /* Swap Button */
@@ -173,12 +246,12 @@
 }
 
 .time-mode label:hover {
-  border-color: var(--gautrain-green);
-  background: #f0fdf4;
+  border-color: var(--gautrain-blue);
+  background: #e3f2fd;
 }
 
 .time-mode input[type="radio"] {
-  accent-color: var(--gautrain-green);
+  accent-color: var(--gautrain-blue);
   width: 18px;
   height: 18px;
   cursor: pointer;
@@ -186,9 +259,9 @@
 
 .time-mode input[type="radio"]:checked + label,
 .time-mode label:has(input[type="radio"]:checked) {
-  border-color: var(--gautrain-green);
-  background: #f0fdf4;
-  color: var(--gautrain-green);
+  border-color: var(--gautrain-blue);
+  background: #e3f2fd;
+  color: var(--gautrain-blue);
   font-weight: 600;
 }
 
@@ -203,8 +276,8 @@
 
 .time-input:focus {
   outline: none;
-  border-color: var(--gautrain-green);
-  box-shadow: 0 0 0 3px rgba(0, 166, 81, 0.1);
+  border-color: var(--gautrain-blue);
+  box-shadow: 0 0 0 3px rgba(0, 62, 126, 0.1);
 }
 
 .day-type {
@@ -228,20 +301,20 @@
 }
 
 .day-type label:hover {
-  border-color: var(--gautrain-green);
+  border-color: var(--gautrain-blue);
   background: #f0fdf4;
 }
 
 .day-type input[type="radio"] {
-  accent-color: var(--gautrain-green);
+  accent-color: var(--gautrain-blue);
   width: 18px;
   height: 18px;
   cursor: pointer;
 }
 
 .day-type label:has(input[type="radio"]:checked) {
-  border-color: var(--gautrain-green);
-  background: var(--gautrain-green);
+  border-color: var(--gautrain-blue);
+  background: var(--gautrain-blue);
   color: white;
   font-weight: 600;
 }
@@ -250,7 +323,7 @@
 .search-button {
   width: 100%;
   padding: 1rem 2rem;
-  background: linear-gradient(135deg, var(--gautrain-green) 0%, #008c44 100%);
+  background: linear-gradient(135deg, var(--gautrain-blue) 0%, var(--gautrain-blue-light) 100%);
   color: white;
   border: none;
   border-radius: 12px;
@@ -258,12 +331,13 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s;
-  box-shadow: 0 4px 12px rgba(0, 166, 81, 0.3);
+  box-shadow: 0 4px 12px rgba(0, 62, 126, 0.3);
+  border-bottom: 3px solid var(--gautrain-gold);
 }
 
 .search-button:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0, 166, 81, 0.4);
+  box-shadow: 0 6px 16px rgba(0, 62, 126, 0.4);
 }
 
 .search-button:active:not(:disabled) {
@@ -293,7 +367,7 @@
 }
 
 .results h2 {
-  color: var(--gautrain-green);
+  color: var(--gautrain-blue);
   margin: 0 0 0.5rem;
   font-size: 1.5rem;
 }
@@ -322,7 +396,7 @@
 }
 
 .journey-card:hover {
-  border-color: var(--gautrain-green);
+  border-color: var(--gautrain-blue);
   box-shadow: var(--shadow-hover);
   transform: translateY(-2px);
 }
@@ -348,7 +422,7 @@
 .time {
   font-size: 1.5rem;
   font-weight: 700;
-  color: var(--gautrain-green);
+  color: var(--gautrain-blue);
 }
 
 .station {
@@ -377,7 +451,7 @@
 
 .arrow {
   font-size: 1.5rem;
-  color: var(--gautrain-green);
+  color: var(--gautrain-blue);
 }
 
 /* Journey Details */
@@ -428,7 +502,7 @@
 .stops-details summary {
   cursor: pointer;
   font-weight: 600;
-  color: var(--gautrain-green);
+  color: var(--gautrain-blue);
   padding: 0.5rem;
   border-radius: 8px;
   transition: background 0.2s;
@@ -446,7 +520,7 @@
 
 .stops-list li {
   padding: 0.5rem 1rem;
-  border-left: 3px solid var(--gautrain-green);
+  border-left: 3px solid var(--gautrain-blue);
   margin-left: 1rem;
   margin-bottom: 0.5rem;
   background: #f8f9fa;
@@ -465,6 +539,18 @@
 .app-footer p {
   margin: 0;
   font-size: 0.875rem;
+}
+
+.footer-links {
+  margin-bottom: 0.75rem;
+}
+
+.footer-disclaimer {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.6);
+  max-width: 600px;
+  margin: 0.75rem auto 0;
+  line-height: 1.5;
 }
 
 .app-footer a {
@@ -493,6 +579,16 @@
 
 /* Mobile Responsive */
 @media (max-width: 640px) {
+  .header-content {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .gautrain-logo {
+    width: 100px;
+    max-width: 100px;
+  }
+
   .app-header h1 {
     font-size: 1.5rem;
   }
@@ -556,5 +652,14 @@
   .data-source {
     width: 100%;
     justify-content: center;
+  }
+
+  .google-maps-btn {
+    font-size: 0.85rem;
+    padding: 0.75rem 0.875rem;
+  }
+
+  .footer-disclaimer {
+    font-size: 0.7rem;
   }
 }

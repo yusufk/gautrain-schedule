@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import './App.css';
-import { STATIONS_SORTED, planJourney, estimateFare, isPeakTime } from './services/gautrainApi';
-import { formatTime, getCountdown, formatDurationSeconds } from './utils/timeUtils';
+import { LINES, getStationsByLine, planJourney, estimateFare, isPeakTime, getStationByName } from './services/gautrainApi';
+import { formatTime, getCountdown, formatDurationSeconds, getGoogleMapsUrl } from './utils/timeUtils';
 
 function App() {
+  const [selectedLine, setSelectedLine] = useState('north-south');
   const [origin, setOrigin] = useState('');
   const [destination, setDestination] = useState('');
   const [timeMode, setTimeMode] = useState('now'); // 'now', 'departAt', 'arriveBy'
@@ -13,6 +14,10 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [currentTime, setCurrentTime] = useState(new Date());
+
+  // Get stations for selected line
+  const stationsForLine = getStationsByLine(selectedLine);
+  const currentLineInfo = LINES.find(l => l.id === selectedLine);
 
   // Update current time every 30 seconds for countdown
   useEffect(() => {
@@ -27,6 +32,15 @@ function App() {
     const day = new Date().getDay();
     setDayType(day === 0 || day === 6 ? 'weekend' : 'weekday');
   }, []);
+
+  // Reset origin/destination when line changes
+  const handleLineChange = (newLine) => {
+    setSelectedLine(newLine);
+    setOrigin('');
+    setDestination('');
+    setItineraries([]);
+    setError(null);
+  };
 
   const handleSwap = () => {
     const temp = origin;
@@ -88,12 +102,41 @@ function App() {
   return (
     <div className="app">
       <header className="app-header">
-        <h1>🚆 Gautrain Journey Planner</h1>
-        <p>Plan your journey on the Gautrain system</p>
+        <div className="header-content">
+          <img 
+            src="https://gma.gautrain.co.za/SiteAssets/gautrain.png" 
+            alt="Gautrain" 
+            className="gautrain-logo"
+          />
+          <h1>Journey Planner</h1>
+        </div>
+        <p>Smart journey planning for Gautrain commuters</p>
       </header>
 
       <main className="app-main">
         <div className="planner-card">
+          {/* Line Selector */}
+          <div className="line-selector">
+            <label htmlFor="line">Select Line</label>
+            <select
+              id="line"
+              value={selectedLine}
+              onChange={(e) => handleLineChange(e.target.value)}
+              className="line-select"
+            >
+              {LINES.map(line => (
+                <option key={line.id} value={line.id}>
+                  {line.name} ({line.description})
+                </option>
+              ))}
+            </select>
+            {currentLineInfo?.note && (
+              <p className="line-note">
+                ℹ️ {currentLineInfo.note}
+              </p>
+            )}
+          </div>
+
           <div className="route-selection">
             <div className="station-selector">
               <label htmlFor="origin">From</label>
@@ -104,7 +147,7 @@ function App() {
                 className="station-select"
               >
                 <option value="">Select origin station</option>
-                {STATIONS_SORTED.map(station => (
+                {stationsForLine.map(station => (
                   <option key={station.id} value={station.name}>
                     {station.name}
                   </option>
@@ -125,7 +168,7 @@ function App() {
                 className="station-select"
               >
                 <option value="">Select destination station</option>
-                {STATIONS_SORTED.map(station => (
+                {stationsForLine.map(station => (
                   <option key={station.id} value={station.name}>
                     {station.name}
                   </option>
@@ -222,6 +265,13 @@ function App() {
               {itineraries.map((itin, index) => {
                 const isPeak = isPeakTime(itin.departureTime);
                 const fare = estimateFare(origin, destination, isPeak);
+                const originStation = getStationByName(origin);
+                const googleMapsUrl = originStation ? getGoogleMapsUrl(
+                  origin,
+                  originStation.lat,
+                  originStation.lon,
+                  itin.departureTime
+                ) : null;
 
                 return (
                   <div key={itin.id || index} className="journey-card">
@@ -258,6 +308,17 @@ function App() {
                       )}
                     </div>
 
+                    {googleMapsUrl && (
+                      <a 
+                        href={googleMapsUrl} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="google-maps-btn"
+                      >
+                        🗺️ Navigate to {origin} (Arrive 20min early)
+                      </a>
+                    )}
+
                     {itin.stops && itin.stops.length > 2 && (
                       <details className="stops-details">
                         <summary>{itin.stops.length} stops</summary>
@@ -279,9 +340,12 @@ function App() {
       </main>
 
       <footer className="app-footer">
-        <p>
+        <p className="footer-links">
           Built with ❤️ for Gautrain commuters • 
-          <a href="https://github.com" target="_blank" rel="noopener noreferrer"> View on GitHub</a>
+          <a href="https://github.com/yusufk/gautrain-schedule" target="_blank" rel="noopener noreferrer"> View on GitHub</a>
+        </p>
+        <p className="footer-disclaimer">
+          This application is not affiliated with or endorsed by Gautrain Management Agency or Bombela Operating Company.
         </p>
       </footer>
     </div>

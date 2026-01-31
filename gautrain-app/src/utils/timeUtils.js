@@ -49,6 +49,33 @@ export function formatDurationSeconds(seconds) {
 }
 
 /**
+ * Generate Google Maps URL for navigation to station with arrival time
+ * Subtracts 20 minutes from train departure time to account for parking and walking
+ */
+export function getGoogleMapsUrl(stationName, lat, lon, trainDepartureTime) {
+  // Calculate arrival time (20 minutes before train departure)
+  const arrivalTime = new Date(trainDepartureTime);
+  arrivalTime.setMinutes(arrivalTime.getMinutes() - 20);
+  
+  // Format time for Google Maps (Unix timestamp in seconds)
+  const arrivalTimestamp = Math.floor(arrivalTime.getTime() / 1000);
+  
+  // Build Google Maps URL with destination, travelmode, and arrival time
+  const destination = `${lat},${lon}`;
+  const url = new URL('https://www.google.com/maps/dir/');
+  url.searchParams.set('api', '1');
+  url.searchParams.set('destination', destination);
+  url.searchParams.set('travelmode', 'driving');
+  url.searchParams.set('dir_action', 'navigate');
+  
+  // Note: Google Maps doesn't support arrival_time for driving, but we'll include it in the label
+  const label = `${stationName} Gautrain Station (Arrive by ${format(arrivalTime, 'HH:mm')})`;
+  url.searchParams.set('destination_place_id', label);
+  
+  return url.toString();
+}
+
+/**
  * Get relative time ("in 8 minutes", "5 minutes ago")
  */
 export function getRelativeTime(date) {
