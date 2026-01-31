@@ -130,4 +130,4 @@ The `data/` directory contains the original static schedule viewer:
 MIT
 
 ---
-*Created: January 2026*
+*Created: January 2026, for Shazia*
