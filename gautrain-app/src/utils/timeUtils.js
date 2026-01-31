@@ -49,28 +49,26 @@ export function formatDurationSeconds(seconds) {
 }
 
 /**
- * Generate Google Maps URL for navigation to station with arrival time
- * Subtracts 20 minutes from train departure time to account for parking and walking
+ * Generate Google Maps URL for navigation to station with departure time
+ * Sets departure time to 20 minutes before train departure to arrive on time
+ * Note: Google Maps only supports "arrive by" for transit, not driving
  */
 export function getGoogleMapsUrl(stationName, lat, lon, trainDepartureTime) {
-  // Calculate arrival time (20 minutes before train departure)
-  const arrivalTime = new Date(trainDepartureTime);
-  arrivalTime.setMinutes(arrivalTime.getMinutes() - 20);
+  // Calculate when to leave (20 minutes before train departure)
+  const departureTime = new Date(trainDepartureTime);
+  departureTime.setMinutes(departureTime.getMinutes() - 20);
   
   // Format time for Google Maps (Unix timestamp in seconds)
-  const arrivalTimestamp = Math.floor(arrivalTime.getTime() / 1000);
+  const departureTimestamp = Math.floor(departureTime.getTime() / 1000);
   
-  // Build Google Maps URL with destination, travelmode, and arrival time
+  // Build Google Maps URL with destination and departure time
   const destination = `${lat},${lon}`;
   const url = new URL('https://www.google.com/maps/dir/');
   url.searchParams.set('api', '1');
   url.searchParams.set('destination', destination);
   url.searchParams.set('travelmode', 'driving');
   url.searchParams.set('dir_action', 'navigate');
-  
-  // Note: Google Maps doesn't support arrival_time for driving, but we'll include it in the label
-  const label = `${stationName} Gautrain Station (Arrive by ${format(arrivalTime, 'HH:mm')})`;
-  url.searchParams.set('destination_place_id', label);
+  url.searchParams.set('departure_time', departureTimestamp);
   
   return url.toString();
 }
