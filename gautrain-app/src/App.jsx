@@ -50,7 +50,7 @@ function App() {
 
     try {
       let timeType = 'DepartAfter';
-      let time = null;
+      let time = new Date(); // Always use current time as default
 
       if (timeMode === 'departAt' && selectedTime) {
         timeType = 'DepartAfter';
@@ -63,6 +63,7 @@ function App() {
         time = new Date();
         time.setHours(parseInt(hours), parseInt(minutes), 0, 0);
       }
+      // else: timeMode === 'now' uses current time (default)
 
       const results = await planJourney({
         from: origin,

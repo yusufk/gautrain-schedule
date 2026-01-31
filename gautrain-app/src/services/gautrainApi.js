@@ -64,6 +64,16 @@ export async function planJourney({ from, to, timeType = 'DepartAfter', time = n
   }
 
   try {
+    let searchTime = time;
+    let searchTimeType = timeType;
+    
+    // For ArriveBefore, calculate smart departure window
+    // Typical journey is 30-40 min, so search for trains departing 1 hour before target
+    if (timeType === 'ArriveBefore' && time) {
+      searchTime = new Date(time.getTime() - (60 * 60 * 1000)); // 1 hour before
+      searchTimeType = 'DepartAfter';
+    }
+    
     const payload = {
       geometry: {
         coordinates: [
@@ -73,9 +83,9 @@ export async function planJourney({ from, to, timeType = 'DepartAfter', time = n
         type: 'MultiPoint'
       },
       profile: 'ClosestToTime',
-      maxItineraries,
-      timeType,
-      time: time ? time.toISOString() : null,
+      maxItineraries: 20, // Get more options to filter from
+      timeType: searchTimeType,
+      time: searchTime ? searchTime.toISOString() : null,
       only: {
         agencies: [GAUTRAIN_AGENCY_ID],
         modes: []
@@ -98,7 +108,23 @@ export async function planJourney({ from, to, timeType = 'DepartAfter', time = n
     }
 
     const data = await response.json();
-    return parseItineraries(data.itineraries || []);
+    let itineraries = parseItineraries(data.itineraries || []);
+    
+    // Filter and sort based on original time type
+    if (timeType === 'ArriveBefore' && time) {
+      // Only keep trains arriving BEFORE target
+      itineraries = itineraries.filter(itin => itin.arrivalTime <= time);
+      // Sort by departure time descending (latest departure first)
+      itineraries.sort((a, b) => b.departureTime - a.departureTime);
+      // Take top 5
+      itineraries = itineraries.slice(0, maxItineraries);
+    } else {
+      // For DepartAfter, sort by departure time ascending (earliest first)
+      itineraries.sort((a, b) => a.departureTime - b.departureTime);
+      itineraries = itineraries.slice(0, maxItineraries);
+    }
+    
+    return itineraries;
   } catch (error) {
     console.error('API journey planning failed:', error);
     // Fallback to static schedule
@@ -120,11 +146,23 @@ function parseItineraries(itineraries) {
     const originWaypoint = waypoints[0];
     const destinationWaypoint = waypoints[waypoints.length - 1];
 
+    // Use waypoint departure/arrival times instead of itinerary times for accuracy
+    const departureTime = originWaypoint?.departureTime 
+      ? new Date(originWaypoint.departureTime) 
+      : new Date(itin.departureTime);
+    
+    const arrivalTime = destinationWaypoint?.arrivalTime 
+      ? new Date(destinationWaypoint.arrivalTime) 
+      : new Date(itin.arrivalTime);
+
+    // Calculate accurate duration from actual waypoint times
+    const duration = Math.floor((arrivalTime - departureTime) / 1000); // in seconds
+
     return {
       id: itin.id,
-      departureTime: new Date(itin.departureTime),
-      arrivalTime: new Date(itin.arrivalTime),
-      duration: itin.duration, // in seconds
+      departureTime,
+      arrivalTime,
+      duration,
       distance: itin.distance?.value || 0, // in meters
       origin: originWaypoint?.stop?.name || 'Unknown',
       destination: destinationWaypoint?.stop?.name || 'Unknown',
