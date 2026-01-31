@@ -1,0 +1,240 @@
+[
+  {
+    "id": "l99Qqgtul0imZWPofLfzyA",
+    "href": "https://afrigis.co.za",
+    "name": "Centurion",
+    "code": null,
+    "geometry": {
+      "type": "Point",
+      "coordinates": [
+        28.1897,
+        -25.85161
+      ]
+    },
+    "modes": [
+      "Bus",
+      "Rail"
+    ],
+    "agency": {
+      "id": "edObkk6o-0WN3tNZBLqKPg",
+      "name": "Gautrain",
+      "culture": "en",
+      "description": "Gautrain Agency",
+      "href": "https://afrigis.co.za"
+    }
+  },
+  {
+    "id": "_rkqSHvRE0Scvbcsuy0EVw",
+    "href": "https://afrigis.co.za",
+    "name": "Hatfield",
+    "code": null,
+    "geometry": {
+      "type": "Point",
+      "coordinates": [
+        28.23794,
+        -25.74762
+      ]
+    },
+    "modes": [
+      "Bus",
+      "Rail"
+    ],
+    "agency": {
+      "id": "edObkk6o-0WN3tNZBLqKPg",
+      "name": "Gautrain",
+      "culture": "en",
+      "description": "Gautrain Agency",
+      "href": "https://afrigis.co.za"
+    }
+  },
+  {
+    "id": "GqW6XDaSsk-6eFTiiRt46A",
+    "href": "https://afrigis.co.za",
+    "name": "Marlboro",
+    "code": null,
+    "geometry": {
+      "type": "Point",
+      "coordinates": [
+        28.11164,
+        -26.08337
+      ]
+    },
+    "modes": [
+      "Rail"
+    ],
+    "agency": {
+      "id": "edObkk6o-0WN3tNZBLqKPg",
+      "name": "Gautrain",
+      "culture": "en",
+      "description": "Gautrain Agency",
+      "href": "https://afrigis.co.za"
+    }
+  },
+  {
+    "id": "ucS8WAkRbkiKUDPHCVxSYA",
+    "href": "https://afrigis.co.za",
+    "name": "Midrand",
+    "code": null,
+    "geometry": {
+      "type": "Point",
+      "coordinates": [
+        28.13586,
+        -25.99555
+      ]
+    },
+    "modes": [
+      "Bus",
+      "Rail"
+    ],
+    "agency": {
+      "id": "edObkk6o-0WN3tNZBLqKPg",
+      "name": "Gautrain",
+      "culture": "en",
+      "description": "Gautrain Agency",
+      "href": "https://afrigis.co.za"
+    }
+  },
+  {
+    "id": "nsg0gaT4zkWiYlX31c18Ew",
+    "href": "https://afrigis.co.za",
+    "name": "OR Tambo",
+    "code": null,
+    "geometry": {
+      "type": "Point",
+      "coordinates": [
+        28.23127,
+        -26.13225
+      ]
+    },
+    "modes": [
+      "Rail"
+    ],
+    "agency": {
+      "id": "edObkk6o-0WN3tNZBLqKPg",
+      "name": "Gautrain",
+      "culture": "en",
+      "description": "Gautrain Agency",
+      "href": "https://afrigis.co.za"
+    }
+  },
+  {
+    "id": "hIhX2tikw0SinKacAKV6YQ",
+    "href": "https://afrigis.co.za",
+    "name": "Park",
+    "code": null,
+    "geometry": {
+      "type": "Point",
+      "coordinates": [
+        28.04148,
+        -26.19558
+      ]
+    },
+    "modes": [
+      "Bus",
+      "Rail"
+    ],
+    "agency": {
+      "id": "edObkk6o-0WN3tNZBLqKPg",
+      "name": "Gautrain",
+      "culture": "en",
+      "description": "Gautrain Agency",
+      "href": "https://afrigis.co.za"
+    }
+  },
+  {
+    "id": "hv_Bf87q50W48rwIUwqCTg",
+    "href": "https://afrigis.co.za",
+    "name": "Pretoria",
+    "code": null,
+    "geometry": {
+      "type": "Point",
+      "coordinates": [
+        28.18988,
+        -25.75866
+      ]
+    },
+    "modes": [
+      "Bus",
+      "Rail"
+    ],
+    "agency": {
+      "id": "edObkk6o-0WN3tNZBLqKPg",
+      "name": "Gautrain",
+      "culture": "en",
+      "description": "Gautrain Agency",
+      "href": "https://afrigis.co.za"
+    }
+  },
+  {
+    "id": "nOZz7-NPrEmB2KacALquAA",
+    "href": "https://afrigis.co.za",
+    "name": "Rhodesfield",
+    "code": null,
+    "geometry": {
+      "type": "Point",
+      "coordinates": [
+        28.22461,
+        -26.12732
+      ]
+    },
+    "modes": [
+      "Bus",
+      "Rail"
+    ],
+    "agency": {
+      "id": "edObkk6o-0WN3tNZBLqKPg",
+      "name": "Gautrain",
+      "culture": "en",
+      "description": "Gautrain Agency",
+      "href": "https://afrigis.co.za"
+    }
+  },
+  {
+    "id": "9HM2lKh9F0mYQfRSO6CGCw",
+    "href": "https://afrigis.co.za",
+    "name": "Rosebank",
+    "code": null,
+    "geometry": {
+      "type": "Point",
+      "coordinates": [
+        28.04451,
+        -26.14622
+      ]
+    },
+    "modes": [
+      "Bus",
+      "Rail"
+    ],
+    "agency": {
+      "id": "edObkk6o-0WN3tNZBLqKPg",
+      "name": "Gautrain",
+      "culture": "en",
+      "description": "Gautrain Agency",
+      "href": "https://afrigis.co.za"
+    }
+  },
+  {
+    "id": "jXU-OlvxukW8wfc7JeVeXw",
+    "href": "https://afrigis.co.za",
+    "name": "Sandton",
+    "code": null,
+    "geometry": {
+      "type": "Point",
+      "coordinates": [
+        28.05693,
+        -26.10858
+      ]
+    },
+    "modes": [
+      "Bus",
+      "Rail"
+    ],
+    "agency": {
+      "id": "edObkk6o-0WN3tNZBLqKPg",
+      "name": "Gautrain",
+      "culture": "en",
+      "description": "Gautrain Agency",
+      "href": "https://afrigis.co.za"
+    }
+  }
+]
