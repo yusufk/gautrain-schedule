@@ -79,3 +79,74 @@ export function getGoogleMapsUrl(stationName, lat, lon, trainDepartureTime) {
 export function getRelativeTime(date) {
   return formatDistance(date, new Date(), { addSuffix: true });
 }
+
+/**
+ * Generate calendar/reminder URLs for various platforms
+ * Creates a universal reminder 20 minutes before departure
+ */
+export function getCalendarUrl(origin, destination, departureTime, duration) {
+  const reminderTime = new Date(departureTime);
+  reminderTime.setMinutes(reminderTime.getMinutes() - 20);
+  
+  const arrivalTime = new Date(departureTime);
+  arrivalTime.setSeconds(arrivalTime.getSeconds() + duration);
+  
+  const title = `Gautrain: ${origin} → ${destination}`;
+  const description = `Depart ${origin} at ${formatTime(departureTime)}\\nArrive ${destination} at ${formatTime(arrivalTime)}\\n\\nLeave 20 minutes early to reach the station on time.`;
+  
+  // Format dates for calendar (YYYYMMDDTHHMMSS)
+  const formatCalendarDate = (date) => {
+    return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+  };
+  
+  const startTime = formatCalendarDate(reminderTime);
+  const endTime = formatCalendarDate(arrivalTime);
+  
+  // Google Calendar URL
+  const googleUrl = new URL('https://calendar.google.com/calendar/render');
+  googleUrl.searchParams.set('action', 'TEMPLATE');
+  googleUrl.searchParams.set('text', title);
+  googleUrl.searchParams.set('dates', `${startTime}/${endTime}`);
+  googleUrl.searchParams.set('details', description);
+  
+  return googleUrl.toString();
+}
+
+/**
+ * Generate webcal ICS file content for device-neutral calendar import
+ */
+export function generateICSContent(origin, destination, departureTime, duration) {
+  const reminderTime = new Date(departureTime);
+  reminderTime.setMinutes(reminderTime.getMinutes() - 20);
+  
+  const arrivalTime = new Date(departureTime);
+  arrivalTime.setSeconds(arrivalTime.getSeconds() + duration);
+  
+  const title = `Gautrain: ${origin} → ${destination}`;
+  const description = `Depart ${origin} at ${formatTime(departureTime)}\\nArrive ${destination} at ${formatTime(arrivalTime)}\\n\\nLeave 20 minutes early to reach the station on time.`;
+  
+  const formatICSDate = (date) => {
+    return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+  };
+  
+  const icsContent = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//Gautrain Schedule//EN',
+    'CALSCALE:GREGORIAN',
+    'BEGIN:VEVENT',
+    `DTSTART:${formatICSDate(reminderTime)}`,
+    `DTEND:${formatICSDate(arrivalTime)}`,
+    `SUMMARY:${title}`,
+    `DESCRIPTION:${description}`,
+    'BEGIN:VALARM',
+    'TRIGGER:-PT0M',
+    'ACTION:DISPLAY',
+    `DESCRIPTION:${title}`,
+    'END:VALARM',
+    'END:VEVENT',
+    'END:VCALENDAR'
+  ].join('\\r\\n');
+  
+  return icsContent;
+}

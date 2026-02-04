@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import './App.css';
 import { LINES, getStationsByLine, planJourney, estimateFare, isPeakTime, getStationByName } from './services/gautrainApi';
-import { formatTime, formatDurationSeconds, getGoogleMapsUrl } from './utils/timeUtils';
+import { formatTime, formatDurationSeconds, getGoogleMapsUrl, getCalendarUrl, generateICSContent } from './utils/timeUtils';
 import { NixieCountdown } from './components/NixieCountdown';
 
 function App() {
@@ -19,6 +19,19 @@ function App() {
   const stationsForLine = getStationsByLine(selectedLine);
   const currentLineInfo = LINES.find(l => l.id === selectedLine);
 
+  // Handle calendar reminder download
+  const handleAddToCalendar = (origin, destination, departureTime, duration) => {
+    const icsContent = generateICSContent(origin, destination, departureTime, duration);
+    const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `gautrain-${origin}-${destination}.ics`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
 
 
   // Auto-detect day type
@@ -290,7 +303,7 @@ function App() {
 
                 return (
                   <div key={itin.id || index} className="journey-card">
-                    <NixieCountdown departureTime={itin.departureTime} />
+                    <NixieCountdown departureTime={itin.departureTime} is8Car={itin.is8Car} />
                     
                     <div className="journey-header">
                       <div className="journey-time">
@@ -315,23 +328,27 @@ function App() {
                           💳 R{fare} {isPeak ? '(Peak)' : '(Off-peak)'}
                         </div>
                       )}
-                      {itin.is8Car !== undefined && (
-                        <div className="train-capacity">
-                          🚃 {itin.is8Car ? '8-car train' : '4-car train'}
-                        </div>
-                      )}
                     </div>
 
-                    {googleMapsUrl && (
-                      <a 
-                        href={googleMapsUrl} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="google-maps-btn"
+                    <div className="journey-actions">
+                      {googleMapsUrl && (
+                        <a 
+                          href={googleMapsUrl} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="action-btn navigate-btn"
+                        >
+                          🗺️ Navigate to {origin}
+                        </a>
+                      )}
+                      <button
+                        onClick={() => handleAddToCalendar(origin, destination, itin.departureTime, itin.duration)}
+                        className="action-btn calendar-btn"
+                        title="Add reminder to calendar (20 min before departure)"
                       >
-                        🗺️ Navigate to {origin} (Arrive 20min early)
-                      </a>
-                    )}
+                        📅 Set Reminder
+                      </button>
+                    </div>
 
                     {itin.stops && itin.stops.length > 2 && (
                       <details className="stops-details">

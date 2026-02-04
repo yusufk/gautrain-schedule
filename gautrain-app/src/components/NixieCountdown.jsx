@@ -5,7 +5,7 @@ import './NixieCountdown.css';
  * Gautrain departure board-style countdown timer
  * Displays minutes and seconds until train departure with LED display aesthetic
  */
-export function NixieCountdown({ departureTime }) {
+export function NixieCountdown({ departureTime, is8Car }) {
   const { minutes, seconds, isExpired } = useCountdown(departureTime);
 
   if (isExpired) {
@@ -39,6 +39,11 @@ export function NixieCountdown({ departureTime }) {
             <span className="led-unit">SEC</span>
           </div>
         </div>
+        {is8Car !== undefined && (
+          <div className="board-capacity">
+            {is8Car ? '8-CAR' : '4-CAR'}
+          </div>
+        )}
       </div>
     </div>
   );
