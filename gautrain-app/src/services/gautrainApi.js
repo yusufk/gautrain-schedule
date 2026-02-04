@@ -7,6 +7,29 @@ const API_BASE_URL = 'https://api.gautrain.co.za';
 const GAUTRAIN_AGENCY_ID = 'edObkk6o-0WN3tNZBLqKPg';
 
 // Station data with coordinates (from API)
+// North-South Line stations with order for direction detection
+const NORTH_SOUTH_STATIONS = {
+  'Park': { order: 1 },
+  'Rosebank': { order: 2 },
+  'Sandton': { order: 3 },
+  'Marlboro': { order: 4 },
+  'Midrand': { order: 5 },
+  'Centurion': { order: 6 },
+  'Pretoria': { order: 7 },
+  'Hatfield': { order: 8 }
+};
+
+// Airport Line stations with order for direction detection
+const AIRPORT_STATIONS = {
+  'Sandton': { order: 1 },
+  'Marlboro': { order: 2 },
+  'Rhodesfield': { order: 3 },
+  'OR Tambo': { order: 4 }
+};
+
+// Airport-only stations (not on North-South line)
+const AIRPORT_ONLY_STATIONS = ['Rhodesfield', 'OR Tambo'];
+
 export const STATIONS = [
   // North-South Line (Park to Hatfield)
   { id: 'TGRd5ew380mY3kfLhM2f6A', name: 'Park', lat: -26.20476, lon: 28.04559, order: 1, line: 'north-south' },
@@ -17,10 +40,11 @@ export const STATIONS = [
   { id: 'l99Qqgtul0imZWPofLfzyA', name: 'Centurion', lat: -25.85161, lon: 28.1897, order: 6, line: 'north-south' },
   { id: 'hv_Bf87q50W48rwIUwqCTg', name: 'Pretoria', lat: -25.75866, lon: 28.18988, order: 7, line: 'north-south' },
   { id: '_rkqSHvRE0Scvbcsuy0EVw', name: 'Hatfield', lat: -25.74762, lon: 28.23794, order: 8, line: 'north-south' },
-  // Airport Line (Sandton to OR Tambo via Rhodesfield)
+  // Airport Line (Sandton to OR Tambo via Marlboro and Rhodesfield)
   { id: 'jXU-OlvxukW8wfc7JeVeXw', name: 'Sandton', lat: -26.10858, lon: 28.05693, order: 1, line: 'airport' },
-  { id: 'nOZz7-NPrEmB2KacALquAA', name: 'Rhodesfield', lat: -26.12732, lon: 28.22461, order: 2, line: 'airport' },
-  { id: 'nsg0gaT4zkWiYlX31c18Ew', name: 'OR Tambo', lat: -26.13225, lon: 28.23127, order: 3, line: 'airport' },
+  { id: 'GqW6XDaSsk-6eFTiiRt46A', name: 'Marlboro', lat: -26.08337, lon: 28.11164, order: 2, line: 'airport' },
+  { id: 'nOZz7-NPrEmB2KacALquAA', name: 'Rhodesfield', lat: -26.12732, lon: 28.22461, order: 3, line: 'airport' },
+  { id: 'nsg0gaT4zkWiYlX31c18Ew', name: 'OR Tambo', lat: -26.13225, lon: 28.23127, order: 4, line: 'airport' },
 ];
 
 // Available lines
@@ -80,219 +104,135 @@ export async function planJourney({ from, to, timeType = 'DepartAfter', time = n
     throw new Error('Invalid station names');
   }
 
-  try {
-    let searchTime = time;
-    let searchTimeType = timeType;
-    
-    // For DepartWindow, search from window start time
-    if (timeType === 'DepartWindow' && timeWindow) {
-      searchTime = timeWindow.start;
-      searchTimeType = 'DepartAfter';
-    }
-    // For ArriveBefore, search from now + 1 minute (to get upcoming trains, not just-departed ones)
-    else if (timeType === 'ArriveBefore' && time) {
-      searchTime = new Date(Date.now() + 60000); // 1 minute from now
-      searchTimeType = 'DepartAfter';
-    }
-    
-    const payload = {
-      geometry: {
-        coordinates: [
-          [fromStation.lon, fromStation.lat],
-          [toStation.lon, toStation.lat]
-        ],
-        type: 'MultiPoint'
-      },
-      profile: 'ClosestToTime',
-      maxItineraries: 30, // Get more options to filter from
-      timeType: searchTimeType,
-      time: searchTime ? searchTime.toISOString() : null,
-      only: {
-        agencies: [GAUTRAIN_AGENCY_ID],
-        modes: []
-      }
-    };
-
-    console.log('API Request:', {
-      timeType: searchTimeType,
-      searchTime: searchTime ? searchTime.toISOString() : null,
-      originalTimeType: timeType,
-      targetTime: time ? time.toISOString() : null
-    });
-
-    const response = await fetch(
-      `${API_BASE_URL}/transport-api/api/0/journey/create`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload)
-      }
-    );
-
-    if (!response.ok) {
-      throw new Error(`API error: ${response.status}`);
-    }
-
-    const data = await response.json();
-    let itineraries = parseItineraries(data.itineraries || []);
-    
-    console.log('API returned:', {
-      timeType,
-      targetTime: time,
-      rawCount: (data.itineraries || []).length,
-      parsedCount: itineraries.length,
-      sampleItineraries: itineraries.slice(0, 3).map(i => ({
-        depart: i.departureTime.toISOString(),
-        arrive: i.arrivalTime.toISOString()
-      }))
-    });
-    
-    // Get current time for filtering
-    const currentTime = new Date();
-    
-    // Filter and sort based on original time type
-    if (timeType === 'DepartWindow' && timeWindow) {
-      // Filter trains within the window
-      itineraries = itineraries.filter(itin => 
-        itin.departureTime >= timeWindow.start && itin.departureTime <= timeWindow.end
-      );
-      // Sort by proximity to target time (closest first)
-      itineraries.sort((a, b) => {
-        const diffA = Math.abs(a.departureTime - timeWindow.target);
-        const diffB = Math.abs(b.departureTime - timeWindow.target);
-        return diffA - diffB;
-      });
-      itineraries = itineraries.slice(0, maxItineraries);
-    } else if (timeType === 'ArriveBefore') {
-      // Filter: trains that haven't departed yet AND arrive before target
-      const now = new Date();
-      
-      const debugInfo = itineraries.map(i => ({
-        depart: i.departureTime.toISOString(),
-        arrive: i.arrivalTime.toISOString(),
-        departAfterNow: i.departureTime > now,
-        arriveBeforeTarget: i.arrivalTime <= time
-      }));
-      console.log('ArriveBefore - All itineraries before filter:', JSON.stringify(debugInfo, null, 2));
-      
-      itineraries = itineraries.filter(itin => 
-        itin.departureTime > now && itin.arrivalTime <= time
-      );
-      console.log('ArriveBefore filtering:', {
-        targetArrival: time.toISOString(),
-        now: now.toISOString(),
-        afterFilter: itineraries.length
-      });
-      // Sort by arrival time descending (latest arrival first, closest to target)
-      itineraries.sort((a, b) => b.arrivalTime - a.arrivalTime);
-      itineraries = itineraries.slice(0, maxItineraries);
-      
-      // If API returned no valid results, fall back to static schedule
-      if (itineraries.length === 0) {
-        console.log('API returned no valid ArriveBefore results, falling back to static schedule');
-        return planJourneyStatic({ from, to, timeType, time, timeWindow, maxItineraries });
-      }
-    } else {
-      // For DepartAfter, filter out trains that have already departed
-      // Add 1 minute buffer to account for boarding time
-      const departureThreshold = new Date(currentTime.getTime() + 60000);
-      itineraries = itineraries.filter(itin => itin.departureTime > departureThreshold);
-      // Sort by departure time ascending (earliest first)
-      itineraries.sort((a, b) => a.departureTime - b.departureTime);
-      itineraries = itineraries.slice(0, maxItineraries);
-    }
-    
-    return itineraries;
-  } catch (error) {
-    console.error('API journey planning failed, falling back to static schedule:', error);
-    // Fallback to static schedule
-    return planJourneyStatic({ from, to, timeType, time, timeWindow, maxItineraries });
+  // Route to specific handler based on time type
+  if (timeType === 'DepartWindow' && timeWindow) {
+    return planDepartAtAround({ from, to, fromStation, toStation, timeWindow, maxItineraries });
+  } else if (timeType === 'ArriveBefore' && time) {
+    return planArriveBy({ from, to, fromStation, toStation, time, maxItineraries });
+  } else {
+    return planDepartNow({ from, to, fromStation, toStation, maxItineraries });
   }
 }
 
 /**
- * Parse API itineraries into simplified format
+ * DEPART NOW - Show trains departing from now onwards
+ * Uses static schedule as primary source (authoritative timetable)
  */
-function parseItineraries(itineraries) {
-  return itineraries.map(itin => {
-    const legs = itin.legs || [];
-    const transitLeg = legs.find(leg => leg.type === 'Transit');
-    
-    if (!transitLeg) return null;
-
-    const waypoints = transitLeg.waypoints || [];
-    const originWaypoint = waypoints[0];
-    const destinationWaypoint = waypoints[waypoints.length - 1];
-
-    // Use waypoint departure/arrival times instead of itinerary times for accuracy
-    const departureTime = originWaypoint?.departureTime 
-      ? new Date(originWaypoint.departureTime) 
-      : new Date(itin.departureTime);
-    
-    const arrivalTime = destinationWaypoint?.arrivalTime 
-      ? new Date(destinationWaypoint.arrivalTime) 
-      : new Date(itin.arrivalTime);
-
-    // Calculate accurate duration from actual waypoint times
-    const duration = Math.floor((arrivalTime - departureTime) / 1000); // in seconds
-
-    return {
-      id: itin.id,
-      departureTime,
-      arrivalTime,
-      duration,
-      distance: itin.distance?.value || 0, // in meters
-      origin: originWaypoint?.stop?.name || 'Unknown',
-      destination: destinationWaypoint?.stop?.name || 'Unknown',
-      stops: waypoints.map(wp => ({
-        name: wp.stop?.name || 'Unknown',
-        arrivalTime: wp.arrivalTime ? new Date(wp.arrivalTime) : null,
-        departureTime: wp.departureTime ? new Date(wp.departureTime) : null
-      })),
-      line: transitLeg.line?.name || 'North - South Line',
-      source: 'api'
-    };
-  }).filter(Boolean);
+async function planDepartNow({ from, to, maxItineraries }) {
+  const now = new Date();
+  
+  // Use static schedule as primary source
+  return planJourneyStatic({ 
+    from, 
+    to, 
+    timeType: 'DepartAfter', 
+    time: now, 
+    timeWindow: null, 
+    maxItineraries 
+  });
 }
 
 /**
- * Fallback: Plan journey using static schedule data
+ * DEPART AT AROUND - Show trains within ±30 min of selected time
+ * Uses static schedule as primary source (authoritative timetable)
+ */
+async function planDepartAtAround({ from, to, timeWindow, maxItineraries }) {
+  // Use static schedule as primary source
+  return planJourneyStatic({ 
+    from, 
+    to, 
+    timeType: 'DepartWindow', 
+    time: timeWindow.target, 
+    timeWindow, 
+    maxItineraries 
+  });
+}
+
+/**
+ * ARRIVE BY - Show trains that arrive before the specified time
+ * Uses static schedule as primary source (authoritative timetable)
+ */
+async function planArriveBy({ from, to, time, maxItineraries }) {
+  // Use static schedule as primary source
+  return planJourneyStatic({ 
+    from, 
+    to, 
+    timeType: 'ArriveBefore', 
+    time, 
+    timeWindow: null, 
+    maxItineraries 
+  });
+}
+
+/**
+ * Plan journey using static schedule data (primary source - authoritative timetable)
  */
 async function planJourneyStatic({ from, to, timeType, time, timeWindow, maxItineraries }) {
   try {
-    const response = await fetch('/gautrain_schedule.json');
+    const baseUrl = import.meta.env.BASE_URL || '/';
+    const response = await fetch(`${baseUrl}gautrain_schedule.json`);
     const scheduleData = await response.json();
     
-    // For ArriveBefore, we want trains from today that arrive before target time
-    // For DepartWindow, use the target date
-    // Otherwise use current date
     const now = new Date();
     let referenceDate;
     
     if (timeType === 'DepartWindow' && timeWindow) {
       referenceDate = timeWindow.target;
     } else if (timeType === 'ArriveBefore' && time) {
-      // Use the same date as the target arrival time
       referenceDate = time;
     } else {
       referenceDate = now;
     }
     
     const dayType = isWeekend(referenceDate) ? 'weekend' : 'weekday';
-    const trains = scheduleData.routes.north_south[dayType] || [];
     
-    console.log('Static schedule parsing:', {
-      referenceDate: referenceDate.toISOString(),
+    // Determine which line to use based on stations
+    const isAirportJourney = AIRPORT_ONLY_STATIONS.includes(from) || AIRPORT_ONLY_STATIONS.includes(to);
+    
+    let trains, direction, lineName;
+    
+    if (isAirportJourney) {
+      // Airport line journey
+      const fromOrder = AIRPORT_STATIONS[from]?.order;
+      const toOrder = AIRPORT_STATIONS[to]?.order;
+      
+      if (!fromOrder || !toOrder) {
+        console.error('Invalid airport stations:', { from, to });
+        return [];
+      }
+      
+      // West to East: Sandton(1) -> OR Tambo(4), so fromOrder < toOrder
+      // East to West: OR Tambo(4) -> Sandton(1), so fromOrder > toOrder
+      direction = fromOrder < toOrder ? 'west_to_east' : 'east_to_west';
+      trains = scheduleData.airport?.[direction]?.[dayType] || [];
+      lineName = 'Airport Line';
+    } else {
+      // North-South line journey
+      const fromOrder = NORTH_SOUTH_STATIONS[from]?.order;
+      const toOrder = NORTH_SOUTH_STATIONS[to]?.order;
+      
+      if (!fromOrder || !toOrder) {
+        console.error('Invalid north-south stations:', { from, to });
+        return [];
+      }
+      
+      // South to North: Park(1) -> Hatfield(8), so fromOrder < toOrder
+      // North to South: Hatfield(8) -> Park(1), so fromOrder > toOrder
+      direction = fromOrder < toOrder ? 'south_to_north' : 'north_to_south';
+      trains = scheduleData.north_south?.[direction]?.[dayType] || [];
+      lineName = 'North-South Line';
+    }
+    
+    console.log('Static schedule:', {
+      from, to,
+      line: isAirportJourney ? 'airport' : 'north-south',
+      direction,
       dayType,
-      totalTrains: trains.length,
-      timeType,
-      targetTime: time ? time.toISOString() : null,
-      now: now.toISOString()
+      trainsFound: trains.length,
+      timeType
     });
 
-    // Find trains that serve both stations
+    // Parse trains into journey objects
     const validTrains = trains
       .map(train => {
         const fromTime = train.times[from];
@@ -300,17 +240,12 @@ async function planJourneyStatic({ from, to, timeType, time, timeWindow, maxItin
         
         if (!fromTime || !toTime) return null;
 
-        // Parse times using the reference date (could be today or tomorrow)
         const departure = parseScheduleTime(fromTime, referenceDate);
         const arrival = parseScheduleTime(toTime, referenceDate);
-
-        // Check direction is correct (arrival should be after departure)
-        if (arrival <= departure) return null;
-
         const duration = Math.floor((arrival - departure) / 1000); // seconds
 
         return {
-          id: `static-${Math.random()}`,
+          id: `static-${train.times[from]}-${Math.random().toString(36).substr(2, 9)}`,
           departureTime: departure,
           arrivalTime: arrival,
           duration,
@@ -318,55 +253,30 @@ async function planJourneyStatic({ from, to, timeType, time, timeWindow, maxItin
           origin: from,
           destination: to,
           stops: [],
-          line: 'North - South Line',
-          source: 'static'
+          line: lineName,
+          source: 'schedule',
+          is8Car: train.is8Car || false
         };
       })
       .filter(Boolean);
 
     // Filter by time type
     let filtered = validTrains;
-    // Add 1 minute buffer to account for boarding time
-    const departureThreshold = new Date(now.getTime() + 60000);
+    const departureThreshold = new Date(now.getTime() + 60000); // 1 min buffer
     
     if (timeType === 'DepartWindow' && timeWindow) {
       filtered = validTrains.filter(t => 
         t.departureTime >= timeWindow.start && t.departureTime <= timeWindow.end
       );
-      console.log('DepartWindow filtering:', {
-        windowStart: timeWindow.start,
-        windowEnd: timeWindow.end,
-        validTrainsCount: validTrains.length,
-        filteredCount: filtered.length,
-        sampleDepartures: validTrains.slice(0, 3).map(t => t.departureTime)
-      });
     } else if (timeType === 'DepartAfter') {
       filtered = validTrains.filter(t => t.departureTime > departureThreshold);
     } else if (timeType === 'ArriveBefore') {
-      // Filter: trains that arrive before target time
-      // Use 1 minute buffer for trains that haven't departed yet
-      const departureBuffer = new Date(now.getTime() + 60000);
       filtered = validTrains.filter(t => 
-        t.departureTime > departureBuffer && t.arrivalTime <= time
+        t.departureTime > departureThreshold && t.arrivalTime <= time
       );
-      console.log('ArriveBefore static filtering:', {
-        targetArrival: time.toISOString(),
-        departureBuffer: departureBuffer.toISOString(),
-        now: now.toISOString(),
-        totalValid: validTrains.length,
-        afterFilter: filtered.length,
-        sampleValidTrains: validTrains.slice(0, 5).map(t => ({
-          depart: t.departureTime.toISOString(),
-          arrive: t.arrivalTime.toISOString()
-        })),
-        sampleFiltered: filtered.slice(0, 3).map(t => ({
-          depart: t.departureTime.toISOString(),
-          arrive: t.arrivalTime.toISOString()
-        }))
-      });
     }
 
-    // Sort and limit
+    // Sort results
     filtered.sort((a, b) => {
       if (timeType === 'DepartWindow' && timeWindow) {
         // Sort by proximity to target time
@@ -379,9 +289,15 @@ async function planJourneyStatic({ from, to, timeType, time, timeWindow, maxItin
       return a.departureTime - b.departureTime; // Earliest first
     });
 
+    console.log('Static schedule results:', {
+      validTrains: validTrains.length,
+      afterFilter: filtered.length,
+      returning: Math.min(filtered.length, maxItineraries)
+    });
+
     return filtered.slice(0, maxItineraries);
   } catch (error) {
-    console.error('Static schedule fallback failed:', error);
+    console.error('Static schedule failed:', error);
     return [];
   }
 }

@@ -315,9 +315,9 @@ function App() {
                           💳 R{fare} {isPeak ? '(Peak)' : '(Off-peak)'}
                         </div>
                       )}
-                      {itin.source === 'static' && (
-                        <div className="data-source">
-                          📅 Scheduled times
+                      {itin.is8Car !== undefined && (
+                        <div className="train-capacity">
+                          🚃 {itin.is8Car ? '8-car train' : '4-car train'}
                         </div>
                       )}
                     </div>
