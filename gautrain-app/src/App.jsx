@@ -59,17 +59,37 @@ function App() {
     try {
       let timeType = 'DepartAfter';
       let time = new Date(); // Always use current time as default
+      let timeWindow = null;
 
       if (timeMode === 'departAt' && selectedTime) {
-        timeType = 'DepartAfter';
+        timeType = 'DepartWindow';
         const [hours, minutes] = selectedTime.split(':');
         time = new Date();
         time.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+        
+        // If selected time is in the past, adjust to tomorrow
+        const now = new Date();
+        if (time < now) {
+          time.setDate(time.getDate() + 1);
+        }
+        
+        // 30 minutes before and after
+        timeWindow = {
+          start: new Date(time.getTime() - (30 * 60 * 1000)),
+          end: new Date(time.getTime() + (30 * 60 * 1000)),
+          target: time
+        };
       } else if (timeMode === 'arriveBy' && selectedTime) {
         timeType = 'ArriveBefore';
         const [hours, minutes] = selectedTime.split(':');
         time = new Date();
         time.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+        
+        // If selected time is in the past, adjust to tomorrow
+        const now = new Date();
+        if (time < now) {
+          time.setDate(time.getDate() + 1);
+        }
       }
       // else: timeMode === 'now' uses current time (default)
 
@@ -78,6 +98,7 @@ function App() {
         to: destination,
         timeType,
         time,
+        timeWindow,
         maxItineraries: 5
       });
 
@@ -189,7 +210,7 @@ function App() {
                   checked={timeMode === 'departAt'}
                   onChange={(e) => setTimeMode(e.target.value)}
                 />
-                Depart At
+                Depart At Around
               </label>
               <label>
                 <input
