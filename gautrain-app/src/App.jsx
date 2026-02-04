@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import './App.css';
 import { LINES, getStationsByLine, planJourney, estimateFare, isPeakTime, getStationByName } from './services/gautrainApi';
-import { formatTime, getCountdown, formatDurationSeconds, getGoogleMapsUrl } from './utils/timeUtils';
+import { formatTime, formatDurationSeconds, getGoogleMapsUrl } from './utils/timeUtils';
+import { NixieCountdown } from './components/NixieCountdown';
 
 function App() {
   const [selectedLine, setSelectedLine] = useState('north-south');
@@ -13,19 +14,12 @@ function App() {
   const [itineraries, setItineraries] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [currentTime, setCurrentTime] = useState(new Date());
 
   // Get stations for selected line
   const stationsForLine = getStationsByLine(selectedLine);
   const currentLineInfo = LINES.find(l => l.id === selectedLine);
 
-  // Update current time every 30 seconds for countdown
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentTime(new Date());
-    }, 30000);
-    return () => clearInterval(interval);
-  }, []);
+
 
   // Auto-detect day type
   useEffect(() => {
@@ -275,6 +269,8 @@ function App() {
 
                 return (
                   <div key={itin.id || index} className="journey-card">
+                    <NixieCountdown departureTime={itin.departureTime} />
+                    
                     <div className="journey-header">
                       <div className="journey-time">
                         <div className="departure">
@@ -293,9 +289,6 @@ function App() {
                     </div>
 
                     <div className="journey-details">
-                      <div className="countdown">
-                        ⏱️ {getCountdown(itin.departureTime)}
-                      </div>
                       {fare && (
                         <div className="fare">
                           💳 R{fare} {isPeak ? '(Peak)' : '(Off-peak)'}

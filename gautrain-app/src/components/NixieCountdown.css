@@ -1,0 +1,160 @@
+/* Gautrain Departure Board Styles */
+.departure-board {
+  width: 100%;
+  background: linear-gradient(135deg, #003e7e 0%, #002855 100%);
+  border-radius: 8px;
+  padding: 1rem 1.5rem;
+  box-shadow: 
+    0 2px 12px rgba(0, 62, 126, 0.3),
+    inset 0 1px 0 rgba(255, 184, 28, 0.2);
+  border: 3px solid #ffb81c;
+  border-bottom-width: 4px;
+  margin-bottom: 1rem;
+}
+
+.departure-board.departed {
+  background: linear-gradient(135deg, #8b0000 0%, #5a0000 100%);
+  border-color: #ff5252;
+}
+
+.board-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.board-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: #ffb81c;
+  text-transform: uppercase;
+  opacity: 0.9;
+}
+
+.led-display {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.led-group {
+  display: flex;
+  align-items: baseline;
+  gap: 0.25rem;
+}
+
+.led-digit {
+  font-family: 'Courier New', 'Consolas', 'Monaco', monospace;
+  font-size: 2.5rem;
+  font-weight: 700;
+  line-height: 1;
+  color: #ffb81c;
+  text-shadow: 
+    0 0 20px rgba(255, 184, 28, 0.8),
+    0 0 40px rgba(255, 184, 28, 0.4),
+    0 2px 4px rgba(0, 0, 0, 0.5);
+  filter: brightness(1.1);
+  animation: ledGlow 2s ease-in-out infinite;
+}
+
+.led-separator {
+  font-family: 'Courier New', 'Consolas', 'Monaco', monospace;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #ffb81c;
+  text-shadow: 
+    0 0 20px rgba(255, 184, 28, 0.8),
+    0 0 40px rgba(255, 184, 28, 0.4);
+  animation: ledBlink 1.5s ease-in-out infinite;
+  opacity: 1;
+}
+
+.led-unit {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: rgba(255, 184, 28, 0.8);
+  letter-spacing: 1px;
+  margin-left: 0.25rem;
+  text-transform: uppercase;
+}
+
+.status-label {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: #ff5252;
+  text-shadow: 
+    0 0 20px rgba(255, 82, 82, 0.8),
+    0 0 40px rgba(255, 82, 82, 0.4);
+  animation: statusPulse 2s ease-in-out infinite;
+}
+
+/* Animations */
+@keyframes ledGlow {
+  0%, 100% {
+    text-shadow: 
+      0 0 20px rgba(255, 184, 28, 0.8),
+      0 0 40px rgba(255, 184, 28, 0.4),
+      0 2px 4px rgba(0, 0, 0, 0.5);
+  }
+  50% {
+    text-shadow: 
+      0 0 25px rgba(255, 184, 28, 0.9),
+      0 0 50px rgba(255, 184, 28, 0.5),
+      0 2px 4px rgba(0, 0, 0, 0.5);
+  }
+}
+
+@keyframes ledBlink {
+  0%, 45%, 55%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
+@keyframes statusPulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+/* Mobile responsiveness */
+@media (max-width: 640px) {
+  .departure-board {
+    padding: 0.875rem 1rem;
+  }
+
+  .board-label {
+    font-size: 0.65rem;
+    letter-spacing: 1.5px;
+  }
+
+  .led-display {
+    gap: 0.5rem;
+  }
+
+  .led-digit {
+    font-size: 2rem;
+  }
+
+  .led-separator {
+    font-size: 1.5rem;
+  }
+
+  .led-unit {
+    font-size: 0.75rem;
+  }
+
+  .status-label {
+    font-size: 1.25rem;
+    letter-spacing: 2px;
+  }
+}

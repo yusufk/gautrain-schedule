@@ -126,6 +126,9 @@ export async function planJourney({ from, to, timeType = 'DepartAfter', time = n
     const data = await response.json();
     let itineraries = parseItineraries(data.itineraries || []);
     
+    // Get current time for filtering
+    const currentTime = new Date();
+    
     // Filter and sort based on original time type
     if (timeType === 'ArriveBefore' && time) {
       // Only keep trains arriving BEFORE target
@@ -135,7 +138,11 @@ export async function planJourney({ from, to, timeType = 'DepartAfter', time = n
       // Take top 5
       itineraries = itineraries.slice(0, maxItineraries);
     } else {
-      // For DepartAfter, sort by departure time ascending (earliest first)
+      // For DepartAfter, filter out trains that have already departed
+      // Add 1 minute buffer to account for boarding time
+      const departureThreshold = new Date(currentTime.getTime() + 60000);
+      itineraries = itineraries.filter(itin => itin.departureTime > departureThreshold);
+      // Sort by departure time ascending (earliest first)
       itineraries.sort((a, b) => a.departureTime - b.departureTime);
       itineraries = itineraries.slice(0, maxItineraries);
     }
@@ -239,8 +246,12 @@ async function planJourneyStatic({ from, to, timeType, time, maxItineraries }) {
 
     // Filter by time type
     let filtered = validTrains;
+    const currentTime = new Date();
+    // Add 1 minute buffer to account for boarding time
+    const departureThreshold = new Date(currentTime.getTime() + 60000);
+    
     if (timeType === 'DepartAfter') {
-      filtered = validTrains.filter(t => t.departureTime >= now);
+      filtered = validTrains.filter(t => t.departureTime > departureThreshold);
     } else if (timeType === 'ArriveBefore') {
       filtered = validTrains.filter(t => t.arrivalTime <= now);
     }
