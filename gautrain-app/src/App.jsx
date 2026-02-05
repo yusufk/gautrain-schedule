@@ -3,6 +3,7 @@ import './App.css';
 import { LINES, getStationsByLine, planJourney, estimateFare, isPeakTime, getStationByName } from './services/gautrainApi';
 import { formatTime, formatDurationSeconds, getGoogleMapsUrl, getCalendarUrl, generateICSContent } from './utils/timeUtils';
 import { NixieCountdown } from './components/NixieCountdown';
+import ReloadPrompt from './components/ReloadPrompt';
 
 function App() {
   const [selectedLine, setSelectedLine] = useState('north-south');
@@ -399,6 +400,8 @@ function App() {
           This application is not affiliated with or endorsed by Gautrain Management Agency or Bombela Operating Company.
         </p>
       </footer>
+      
+      <ReloadPrompt />
     </div>
   );
 }
