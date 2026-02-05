@@ -3,130 +3,107 @@
     "line": "North - South Line",
     "schedule_type": "Weekdays (Excluding Public Holidays)",
     "direction": "South to North",
-    "stations": [
-      "Park",
-      "Rosebank",
-      "Sandton",
-      "Marlboro",
-      "Midrand",
-      "Centurion",
-      "Pretoria",
-      "Hatfield"
-    ],
-    "frequency_peak": "Every 10 minutes",
-    "frequency_off_peak": "Every 20 minutes",
-    "notes": "Peak fares apply 06h00-08h30 and 15h00-18h30"
+    "stations": ["Park", "Rosebank", "Sandton", "Marlboro", "Midrand", "Centurion", "Pretoria", "Hatfield"],
+    "trips": [
+      {"times": ["05:29", "05:33", "05:37", "05:41", "05:48", "05:57", "06:05", "06:11"], "eight_car": false},
+      {"times": ["05:39", "05:43", "05:47", "05:51", "05:58", "06:07", "06:15", "06:21"], "eight_car": false},
+      {"times": ["05:49", "05:53", "05:57", "06:01", "06:08", "06:17", "06:25", "06:31"], "eight_car": false},
+      {"times": ["05:59", "06:03", "06:07", "06:11", "06:18", "06:27", "06:35", "06:41"], "eight_car": true},
+      {"times": ["06:09", "06:13", "06:17", "06:21", "06:28", "06:37", "06:45", "06:51"], "eight_car": true},
+      {"times": ["06:19", "06:23", "06:27", "06:31", "06:38", "06:47", "06:55", "07:01"], "eight_car": true},
+      {"times": ["06:29", "06:33", "06:37", "06:41", "06:48", "06:57", "07:05", "07:11"], "eight_car": true},
+      {"times": ["06:39", "06:43", "06:47", "06:51", "06:58", "07:07", "07:15", "07:21"], "eight_car": true},
+      {"times": ["06:49", "06:53", "06:57", "07:01", "07:08", "07:17", "07:25", "07:31"], "eight_car": true},
+      {"times": ["06:59", "07:03", "07:07", "07:11", "07:18", "07:27", "07:35", "07:41"], "eight_car": true},
+      {"times": ["20:10", "20:14", "20:18", "20:22", "20:29", "20:38", "20:46", "20:52"], "eight_car": false},
+      {"times": ["20:30", "20:34", "20:38", "20:42", "20:49", "20:58", "21:06", "21:12"], "eight_car": false}
+    ]
   },
   {
     "line": "North - South Line",
     "schedule_type": "Weekdays (Excluding Public Holidays)",
     "direction": "North to South",
-    "stations": [
-      "Hatfield",
-      "Pretoria",
-      "Centurion",
-      "Midrand",
-      "Marlboro",
-      "Sandton",
-      "Rosebank",
-      "Park"
-    ],
-    "frequency_peak": "Every 10 minutes",
-    "frequency_off_peak": "Every 20 minutes",
-    "notes": "Peak fares apply 06h00-08h30 and 15h00-18h30"
+    "stations": ["Hatfield", "Pretoria", "Centurion", "Midrand", "Marlboro", "Sandton", "Rosebank", "Park"],
+    "trips": [
+      {"times": ["05:24", "05:32", "05:39", "05:48", "05:54", "05:59", "06:03", "06:07"], "eight_car": false},
+      {"times": ["05:34", "05:42", "05:49", "05:58", "06:04", "06:09", "06:13", "06:17"], "eight_car": false},
+      {"times": ["05:44", "05:52", "05:59", "06:08", "06:14", "06:19", "06:23", "06:27"], "eight_car": false},
+      {"times": ["05:54", "06:02", "06:09", "06:18", "06:24", "06:29", "06:33", "06:37"], "eight_car": true},
+      {"times": ["06:04", "06:12", "06:19", "06:28", "06:34", "06:39", "06:43", "06:47"], "eight_car": true},
+      {"times": ["20:15", "20:23", "20:30", "20:39", "20:45", "20:50", "20:54", "20:58"], "eight_car": false},
+      {"times": ["20:35", "20:43", "20:50", "20:59", "21:05", "21:10", "21:14", "21:18"], "eight_car": false}
+    ]
   },
   {
     "line": "North - South Line",
     "schedule_type": "Weekends and Public Holidays",
     "direction": "South to North",
-    "stations": [
-      "Park",
-      "Rosebank",
-      "Sandton",
-      "Marlboro",
-      "Midrand",
-      "Centurion",
-      "Pretoria",
-      "Hatfield"
-    ],
-    "frequency": "Every 30 minutes (early/late) or 20 minutes (daytime)",
-    "first_train_departure": "05:30",
-    "last_train_departure": "20:30"
+    "stations": ["Park", "Rosebank", "Sandton", "Marlboro", "Midrand", "Centurion", "Pretoria", "Hatfield"],
+    "trips": [
+      {"times": ["05:30", "05:34", "05:38", "05:42", "05:49", "05:58", "06:06", "06:12"], "eight_car": false},
+      {"times": ["06:00", "06:04", "06:08", "06:12", "06:19", "06:28", "06:36", "06:42"], "eight_car": false},
+      {"times": ["20:00", "20:04", "20:08", "20:12", "20:19", "20:28", "20:36", "20:42"], "eight_car": false},
+      {"times": ["20:30", "20:34", "20:38", "20:42", "20:49", "20:58", "21:06", "21:12"], "eight_car": false}
+    ]
   },
   {
     "line": "North - South Line",
     "schedule_type": "Weekends and Public Holidays",
     "direction": "North to South",
-    "stations": [
-      "Hatfield",
-      "Pretoria",
-      "Centurion",
-      "Midrand",
-      "Marlboro",
-      "Sandton",
-      "Rosebank",
-      "Park"
-    ],
-    "frequency": "Every 30 minutes (early/late) or 20 minutes (daytime)",
-    "first_train_departure": "05:26",
-    "last_train_departure": "20:30"
+    "stations": ["Hatfield", "Pretoria", "Centurion", "Midrand", "Marlboro", "Sandton", "Rosebank", "Park"],
+    "trips": [
+      {"times": ["05:26", "05:33", "05:41", "05:49", "05:56", "06:00", "06:04", "06:08"], "eight_car": false},
+      {"times": ["05:56", "06:03", "06:11", "06:19", "06:26", "06:30", "06:34", "06:38"], "eight_car": false},
+      {"times": ["20:00", "20:07", "20:15", "20:24", "20:30", "20:34", "20:38", "20:42"], "eight_car": false},
+      {"times": ["20:30", "20:37", "20:44", "20:53", "20:59", "21:04", "21:08", "21:12"], "eight_car": false}
+    ]
   },
   {
     "line": "East - West Line and OR Tambo Service",
     "schedule_type": "Weekdays (Excluding Public Holidays)",
     "direction": "East to West",
-    "stations": [
-      "ORTIA",
-      "Rhodesfield",
-      "Marlboro",
-      "Sandton"
-    ],
-    "frequency_peak": "Every 10 minutes",
-    "frequency_off_peak": "Every 20 minutes",
-    "first_train_departure": "05:30",
-    "last_train_departure": "20:30"
+    "stations": ["ORTIA", "Rhodesfield", "Marlboro", "Sandton"],
+    "trips": [
+      {"times": ["05:30", "05:32", "05:39", "05:44"], "eight_car": false},
+      {"times": ["05:40", "05:42", "05:49", "05:54"], "eight_car": false},
+      {"times": ["20:10", "20:12", "20:19", "20:24"], "eight_car": false},
+      {"times": ["20:30", "20:32", "20:39", "20:44"], "eight_car": false}
+    ]
   },
   {
     "line": "East - West Line and OR Tambo Service",
     "schedule_type": "Weekdays (Excluding Public Holidays)",
     "direction": "West to East",
-    "stations": [
-      "Sandton",
-      "Marlboro",
-      "Rhodesfield",
-      "ORTIA"
-    ],
-    "frequency_peak": "Every 10 minutes",
-    "frequency_off_peak": "Every 20 minutes",
-    "first_train_departure": "05:21",
-    "last_train_departure": "20:50"
+    "stations": ["Sandton", "Marlboro", "Rhodesfield", "ORTIA"],
+    "trips": [
+      {"times": ["05:21", "05:25", "05:33", "05:35"], "eight_car": false},
+      {"times": ["05:31", "05:35", "05:43", "05:45"], "eight_car": false},
+      {"times": ["20:30", "20:34", "20:42", "20:44"], "eight_car": false},
+      {"times": ["20:50", "20:54", "21:02", "21:04"], "eight_car": false}
+    ]
   },
   {
     "line": "East - West Line and OR Tambo Service",
     "schedule_type": "Weekends and Public Holidays",
     "direction": "East to West",
-    "stations": [
-      "ORTIA",
-      "Rhodesfield",
-      "Marlboro",
-      "Sandton"
-    ],
-    "frequency": "Every 30 minutes (early/late) or 20 minutes (daytime)",
-    "first_train_departure": "05:27",
-    "last_train_departure": "20:30"
+    "stations": ["ORTIA", "Rhodesfield", "Marlboro", "Sandton"],
+    "trips": [
+      {"times": ["05:27", "05:29", "05:36", "05:41"], "eight_car": false},
+      {"times": ["05:57", "05:59", "06:06", "06:11"], "eight_car": false},
+      {"times": ["20:00", "20:02", "20:09", "20:14"], "eight_car": false},
+      {"times": ["20:30", "20:32", "20:39", "20:44"], "eight_car": false}
+    ]
   },
   {
     "line": "East - West Line and OR Tambo Service",
     "schedule_type": "Weekends and Public Holidays",
     "direction": "West to East",
-    "stations": [
-      "Sandton",
-      "Marlboro",
-      "Rhodesfield",
-      "ORTIA"
-    ],
-    "frequency": "Every 30 minutes (early/late) or 20 minutes (daytime)",
-    "first_train_departure": "05:27",
-    "last_train_departure": "20:50"
+    "stations": ["Sandton", "Marlboro", "Rhodesfield", "ORTIA"],
+    "trips": [
+      {"times": ["05:27", "05:31", "05:39", "05:41"], "eight_car": false},
+      {"times": ["05:57", "06:01", "06:09", "06:11"], "eight_car": false},
+      {"times": ["20:30", "20:34", "20:42", "20:44"], "eight_car": false},
+      {"times": ["20:50", "20:54", "21:02", "21:04"], "eight_car": false}
+    ]
   }
 ]

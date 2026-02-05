@@ -55,7 +55,7 @@ describe('Gautrain API Service', () => {
         expect(train.departureTime).toBeInstanceOf(Date);
         expect(train.arrivalTime).toBeInstanceOf(Date);
         expect(train.duration).toBeGreaterThan(0);
-        expect(train.line).toBe('North-South Line');
+        expect(train.line).toBe('North - South Line');
         
         // Travel time should be ~28 minutes (1680 seconds)
         expect(train.duration).toBeGreaterThanOrEqual(25 * 60);
@@ -78,7 +78,7 @@ describe('Gautrain API Service', () => {
         const train = results[0];
         expect(train.origin).toBe('Pretoria');
         expect(train.destination).toBe('Sandton');
-        expect(train.line).toBe('North-South Line');
+        expect(train.line).toBe('North - South Line');
         
         // Travel time should be ~28 minutes
         expect(train.duration).toBeGreaterThanOrEqual(25 * 60);
@@ -370,39 +370,42 @@ describe('Gautrain API Service', () => {
     });
   });
 
-  describe('Train Capacity (8-car flag)', () => {
-    it('should include is8Car property in results', async () => {
+  describe('Specific Schedule Verification', () => {
+    it('first train after 7am from Rosebank to Hatfield should leave at 7:03 and arrive at 7:41', async () => {
       const targetTime = new Date();
-      targetTime.setHours(7, 0, 0, 0); // Peak hour
-      
+      // Set to a weekday for consistent results
+      while (targetTime.getDay() === 0 || targetTime.getDay() === 6) {
+        targetTime.setDate(targetTime.getDate() + 1);
+      }
+      targetTime.setHours(7, 0, 0, 0);
+
       const results = await planJourney({
-        from: 'Sandton',
-        to: 'Pretoria',
-        timeType: 'DepartWindow',
-        timeWindow: {
-          start: new Date(targetTime.getTime() - 60 * 60 * 1000),
-          target: targetTime,
-          end: new Date(targetTime.getTime() + 60 * 60 * 1000)
-        },
-        maxItineraries: 20
+        from: 'Rosebank',
+        to: 'Hatfield',
+        timeType: 'DepartAfter',
+        time: targetTime,
+        maxItineraries: 1
       });
 
-      // If we got results (depends on schedule data loading), check is8Car property
-      if (results.length > 0) {
-        results.forEach(train => {
-          expect(train).toHaveProperty('is8Car');
-          expect(typeof train.is8Car).toBe('boolean');
-        });
-
-        // During peak hours (6-8 AM), there should be some 8-car trains on weekdays
-        // Note: This test may not find 8-car trains on weekends or if schedule loading fails
-        const has8CarTrains = results.some(train => train.is8Car);
-        // Only assert if we're on a weekday (Mon-Fri)
-        const isWeekday = targetTime.getDay() !== 0 && targetTime.getDay() !== 6;
-        if (isWeekday) {
-          expect(has8CarTrains).toBe(true);
-        }
-      }
+      expect(results.length).toBeGreaterThan(0);
+      
+      const firstTrain = results[0];
+      const departureMinutes = firstTrain.departureTime.getMinutes();
+      const departureSeconds = firstTrain.departureTime.getSeconds();
+      const arrivalHours = firstTrain.arrivalTime.getHours();
+      const arrivalMinutes = firstTrain.arrivalTime.getMinutes();
+      
+      // First train after 7:00 should depart at 7:03
+      expect(firstTrain.departureTime.getHours()).toBe(7);
+      expect(departureMinutes).toBe(3);
+      expect(departureSeconds).toBe(0);
+      
+      // Should arrive at 7:41 (38 minute journey)
+      expect(arrivalHours).toBe(7);
+      expect(arrivalMinutes).toBe(41);
+      
+      // Should be an 8-car train (6:59 departure is 8-car based on schedule)
+      expect(firstTrain.is8Car).toBe(true);
     });
   });
 

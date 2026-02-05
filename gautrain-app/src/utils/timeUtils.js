@@ -4,10 +4,10 @@
 import { format, formatDistance, intervalToDuration, formatDuration } from 'date-fns';
 
 /**
- * Format time as HH:MM
+ * Format time as HH:MM:SS
  */
 export function formatTime(date) {
-  return format(date, 'HH:mm');
+  return format(date, 'HH:mm:ss');
 }
 
 /**

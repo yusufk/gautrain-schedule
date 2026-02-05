@@ -1,6 +1,6 @@
 [
     {
-        "line": "North - South Line",
+        "line": "North-South Line",
         "schedule_type": "Weekdays (Excluding Public Holidays)",
         "direction": "South to North",
         "stations": [
@@ -15,10 +15,11 @@
         ],
         "frequency_peak": "Every 10 minutes",
         "frequency_off_peak": "Every 20 minutes",
+        "first_train_departure": "05:29",
         "notes": "Peak fares apply 06h00-08h30 and 15h00-18h30"
     },
     {
-        "line": "North - South Line",
+        "line": "North-South Line",
         "schedule_type": "Weekdays (Excluding Public Holidays)",
         "direction": "North to South",
         "stations": [
@@ -36,7 +37,7 @@
         "notes": "Peak fares apply 06h00-08h30 and 15h00-18h30"
     },
     {
-        "line": "North - South Line",
+        "line": "North-South Line",
         "schedule_type": "Weekends and Public Holidays",
         "direction": "South to North",
         "stations": [
@@ -54,7 +55,7 @@
         "last_train_departure": "20:30"
     },
     {
-        "line": "North - South Line",
+        "line": "North-South Line",
         "schedule_type": "Weekends and Public Holidays",
         "direction": "North to South",
         "stations": [
@@ -72,11 +73,11 @@
         "last_train_departure": "20:30"
     },
     {
-        "line": "East - West Line and OR Tambo Service",
+        "line": "Airport Line",
         "schedule_type": "Weekdays (Excluding Public Holidays)",
         "direction": "East to West",
         "stations": [
-            "ORTIA",
+            "OR Tambo",
             "Rhodesfield",
             "Marlboro",
             "Sandton"
@@ -87,14 +88,14 @@
         "last_train_departure": "20:30"
     },
     {
-        "line": "East - West Line and OR Tambo Service",
+        "line": "Airport Line",
         "schedule_type": "Weekdays (Excluding Public Holidays)",
         "direction": "West to East",
         "stations": [
             "Sandton",
             "Marlboro",
             "Rhodesfield",
-            "ORTIA"
+            "OR Tambo"
         ],
         "frequency_peak": "Every 10 minutes",
         "frequency_off_peak": "Every 20 minutes",
@@ -102,11 +103,11 @@
         "last_train_departure": "20:50"
     },
     {
-        "line": "East - West Line and OR Tambo Service",
+        "line": "Airport Line",
         "schedule_type": "Weekends and Public Holidays",
         "direction": "East to West",
         "stations": [
-            "ORTIA",
+            "OR Tambo",
             "Rhodesfield",
             "Marlboro",
             "Sandton"
@@ -116,14 +117,14 @@
         "last_train_departure": "20:30"
     },
     {
-        "line": "East - West Line and OR Tambo Service",
+        "line": "Airport Line",
         "schedule_type": "Weekends and Public Holidays",
         "direction": "West to East",
         "stations": [
             "Sandton",
             "Marlboro",
             "Rhodesfield",
-            "ORTIA"
+            "OR Tambo"
         ],
         "frequency": "Every 30 minutes (early/late) or 20 minutes (daytime)",
         "first_train_departure": "05:27",

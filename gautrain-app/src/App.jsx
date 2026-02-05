@@ -80,9 +80,18 @@ function App() {
         time = new Date();
         time.setHours(parseInt(hours), parseInt(minutes), 0, 0);
         
-        // If selected time is in the past, adjust to tomorrow
         const now = new Date();
-        if (time < now) {
+        const isTargetWeekend = dayType === 'weekend';
+        
+        // Find next occurrence of the selected day type at the specified time
+        if (time <= now) {
+          // Move to tomorrow
+          time.setDate(time.getDate() + 1);
+        }
+        
+        // Keep advancing days until we hit the right day type
+        const isTimeWeekend = (d) => d.getDay() === 0 || d.getDay() === 6;
+        while (isTimeWeekend(time) !== isTargetWeekend) {
           time.setDate(time.getDate() + 1);
         }
         
@@ -98,9 +107,18 @@ function App() {
         time = new Date();
         time.setHours(parseInt(hours), parseInt(minutes), 0, 0);
         
-        // If selected time is in the past, adjust to tomorrow
         const now = new Date();
-        if (time < now) {
+        const isTargetWeekend = dayType === 'weekend';
+        
+        // Find next occurrence of the selected day type at the specified time
+        if (time <= now) {
+          // Move to tomorrow
+          time.setDate(time.getDate() + 1);
+        }
+        
+        // Keep advancing days until we hit the right day type
+        const isTimeWeekend = (d) => d.getDay() === 0 || d.getDay() === 6;
+        while (isTimeWeekend(time) !== isTargetWeekend) {
           time.setDate(time.getDate() + 1);
         }
       }
@@ -245,26 +263,28 @@ function App() {
               />
             )}
 
-            <div className="day-type">
-              <label>
-                <input
-                  type="radio"
-                  value="weekday"
-                  checked={dayType === 'weekday'}
-                  onChange={(e) => setDayType(e.target.value)}
-                />
-                Weekday
-              </label>
-              <label>
-                <input
-                  type="radio"
-                  value="weekend"
-                  checked={dayType === 'weekend'}
-                  onChange={(e) => setDayType(e.target.value)}
-                />
-                Weekend
-              </label>
-            </div>
+            {(timeMode === 'departAt' || timeMode === 'arriveBy') && (
+              <div className="day-type">
+                <label>
+                  <input
+                    type="radio"
+                    value="weekday"
+                    checked={dayType === 'weekday'}
+                    onChange={(e) => setDayType(e.target.value)}
+                  />
+                  Weekday
+                </label>
+                <label>
+                  <input
+                    type="radio"
+                    value="weekend"
+                    checked={dayType === 'weekend'}
+                    onChange={(e) => setDayType(e.target.value)}
+                  />
+                  Weekend
+                </label>
+              </div>
+            )}
           </div>
 
           <button
