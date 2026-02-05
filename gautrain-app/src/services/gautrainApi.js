@@ -243,8 +243,9 @@ export async function planJourney({ from, to, timeType = 'DepartAfter', time = n
       return diffA - diffB;
     });
   } else if (timeType === 'ArriveBefore' && time) {
+    const now = new Date();
     filteredTrips = allTrips.filter(t => 
-      t.departureTime > referenceTime && t.arrivalTime <= time
+      t.departureTime > now && t.arrivalTime <= time
     );
     filteredTrips.sort((a, b) => b.departureTime - a.departureTime); // Latest first
   } else {

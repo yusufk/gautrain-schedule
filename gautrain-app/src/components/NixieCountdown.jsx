@@ -18,8 +18,13 @@ export function NixieCountdown({ departureTime, is8Car }) {
     );
   }
 
+  // Calculate hours and remaining minutes
+  const hours = Math.floor(minutes / 60);
+  const remainingMinutes = minutes % 60;
+
   // Format numbers to always be 2 digits
-  const minutesStr = String(minutes).padStart(2, '0');
+  const hoursStr = String(hours).padStart(2, '0');
+  const minutesStr = String(remainingMinutes).padStart(2, '0');
   const secondsStr = String(seconds).padStart(2, '0');
 
   return (
@@ -27,17 +32,35 @@ export function NixieCountdown({ departureTime, is8Car }) {
       <div className="board-content">
         <div className="board-label">DEPARTS IN</div>
         <div className="led-display">
-          <div className="led-group">
-            <span className="led-digit">{minutesStr[0]}</span>
-            <span className="led-digit">{minutesStr[1]}</span>
-            <span className="led-unit">MIN</span>
-          </div>
-          <span className="led-separator">:</span>
-          <div className="led-group">
-            <span className="led-digit">{secondsStr[0]}</span>
-            <span className="led-digit">{secondsStr[1]}</span>
-            <span className="led-unit">SEC</span>
-          </div>
+          {hours > 0 ? (
+            <>
+              <div className="led-group">
+                <span className="led-digit">{hoursStr[0]}</span>
+                <span className="led-digit">{hoursStr[1]}</span>
+                <span className="led-unit">HR</span>
+              </div>
+              <span className="led-separator">:</span>
+              <div className="led-group">
+                <span className="led-digit">{minutesStr[0]}</span>
+                <span className="led-digit">{minutesStr[1]}</span>
+                <span className="led-unit">MIN</span>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="led-group">
+                <span className="led-digit">{minutesStr[0]}</span>
+                <span className="led-digit">{minutesStr[1]}</span>
+                <span className="led-unit">MIN</span>
+              </div>
+              <span className="led-separator">:</span>
+              <div className="led-group">
+                <span className="led-digit">{secondsStr[0]}</span>
+                <span className="led-digit">{secondsStr[1]}</span>
+                <span className="led-unit">SEC</span>
+              </div>
+            </>
+          )}
         </div>
         <div className="train-capacity">
           <span className="capacity-label">
