@@ -1,0 +1,132 @@
+[
+  {
+    "line": "North - South Line",
+    "schedule_type": "Weekdays (Excluding Public Holidays)",
+    "direction": "South to North",
+    "stations": [
+      "Park",
+      "Rosebank",
+      "Sandton",
+      "Marlboro",
+      "Midrand",
+      "Centurion",
+      "Pretoria",
+      "Hatfield"
+    ],
+    "frequency_peak": "Every 10 minutes",
+    "frequency_off_peak": "Every 20 minutes",
+    "notes": "Peak fares apply 06h00-08h30 and 15h00-18h30"
+  },
+  {
+    "line": "North - South Line",
+    "schedule_type": "Weekdays (Excluding Public Holidays)",
+    "direction": "North to South",
+    "stations": [
+      "Hatfield",
+      "Pretoria",
+      "Centurion",
+      "Midrand",
+      "Marlboro",
+      "Sandton",
+      "Rosebank",
+      "Park"
+    ],
+    "frequency_peak": "Every 10 minutes",
+    "frequency_off_peak": "Every 20 minutes",
+    "notes": "Peak fares apply 06h00-08h30 and 15h00-18h30"
+  },
+  {
+    "line": "North - South Line",
+    "schedule_type": "Weekends and Public Holidays",
+    "direction": "South to North",
+    "stations": [
+      "Park",
+      "Rosebank",
+      "Sandton",
+      "Marlboro",
+      "Midrand",
+      "Centurion",
+      "Pretoria",
+      "Hatfield"
+    ],
+    "frequency": "Every 30 minutes (early/late) or 20 minutes (daytime)",
+    "first_train_departure": "05:30",
+    "last_train_departure": "20:30"
+  },
+  {
+    "line": "North - South Line",
+    "schedule_type": "Weekends and Public Holidays",
+    "direction": "North to South",
+    "stations": [
+      "Hatfield",
+      "Pretoria",
+      "Centurion",
+      "Midrand",
+      "Marlboro",
+      "Sandton",
+      "Rosebank",
+      "Park"
+    ],
+    "frequency": "Every 30 minutes (early/late) or 20 minutes (daytime)",
+    "first_train_departure": "05:26",
+    "last_train_departure": "20:30"
+  },
+  {
+    "line": "East - West Line and OR Tambo Service",
+    "schedule_type": "Weekdays (Excluding Public Holidays)",
+    "direction": "East to West",
+    "stations": [
+      "ORTIA",
+      "Rhodesfield",
+      "Marlboro",
+      "Sandton"
+    ],
+    "frequency_peak": "Every 10 minutes",
+    "frequency_off_peak": "Every 20 minutes",
+    "first_train_departure": "05:30",
+    "last_train_departure": "20:30"
+  },
+  {
+    "line": "East - West Line and OR Tambo Service",
+    "schedule_type": "Weekdays (Excluding Public Holidays)",
+    "direction": "West to East",
+    "stations": [
+      "Sandton",
+      "Marlboro",
+      "Rhodesfield",
+      "ORTIA"
+    ],
+    "frequency_peak": "Every 10 minutes",
+    "frequency_off_peak": "Every 20 minutes",
+    "first_train_departure": "05:21",
+    "last_train_departure": "20:50"
+  },
+  {
+    "line": "East - West Line and OR Tambo Service",
+    "schedule_type": "Weekends and Public Holidays",
+    "direction": "East to West",
+    "stations": [
+      "ORTIA",
+      "Rhodesfield",
+      "Marlboro",
+      "Sandton"
+    ],
+    "frequency": "Every 30 minutes (early/late) or 20 minutes (daytime)",
+    "first_train_departure": "05:27",
+    "last_train_departure": "20:30"
+  },
+  {
+    "line": "East - West Line and OR Tambo Service",
+    "schedule_type": "Weekends and Public Holidays",
+    "direction": "West to East",
+    "stations": [
+      "Sandton",
+      "Marlboro",
+      "Rhodesfield",
+      "ORTIA"
+    ],
+    "frequency": "Every 30 minutes (early/late) or 20 minutes (daytime)",
+    "first_train_departure": "05:27",
+    "last_train_departure": "20:50"
+  }
+]

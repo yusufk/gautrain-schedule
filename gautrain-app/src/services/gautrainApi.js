@@ -1,37 +1,29 @@
 /**
- * Gautrain API Service
- * Handles API calls to Gautrain journey planning API with fallback to static data
+ * Gautrain Schedule Service
+ * Generates train times based on frequency logic and checks API for delays
  */
 
 const API_BASE_URL = 'https://api.gautrain.co.za';
 const GAUTRAIN_AGENCY_ID = 'edObkk6o-0WN3tNZBLqKPg';
 
-// Station data with coordinates (from API)
-// North-South Line stations with order for direction detection
-const NORTH_SOUTH_STATIONS = {
-  'Park': { order: 1 },
-  'Rosebank': { order: 2 },
-  'Sandton': { order: 3 },
-  'Marlboro': { order: 4 },
-  'Midrand': { order: 5 },
-  'Centurion': { order: 6 },
-  'Pretoria': { order: 7 },
-  'Hatfield': { order: 8 }
+// Travel time between consecutive stations (minutes)
+const TRAVEL_TIMES = {
+  'Park-Rosebank': 4,
+  'Rosebank-Sandton': 4,
+  'Sandton-Marlboro': 4,
+  'Marlboro-Midrand': 7,
+  'Midrand-Centurion': 9,
+  'Centurion-Pretoria': 8,
+  'Pretoria-Hatfield': 6,
+  'Marlboro-Rhodesfield': 13,
+  'Rhodesfield-ORTIA': 4,
 };
 
-// Airport Line stations with order for direction detection
-const AIRPORT_STATIONS = {
-  'Sandton': { order: 1 },
-  'Marlboro': { order: 2 },
-  'Rhodesfield': { order: 3 },
-  'OR Tambo': { order: 4 }
-};
+let scheduleCache = null;
 
-// Airport-only stations (not on North-South line)
-const AIRPORT_ONLY_STATIONS = ['Rhodesfield', 'OR Tambo'];
 
 export const STATIONS = [
-  // North-South Line (Park to Hatfield)
+  // North-South Line
   { id: 'TGRd5ew380mY3kfLhM2f6A', name: 'Park', lat: -26.20476, lon: 28.04559, order: 1, line: 'north-south' },
   { id: 'gikqF3ZsE0uMWbXJgCh_rA', name: 'Rosebank', lat: -26.14808, lon: 28.04105, order: 2, line: 'north-south' },
   { id: 'jXU-OlvxukW8wfc7JeVeXw', name: 'Sandton', lat: -26.10858, lon: 28.05693, order: 3, line: 'north-south' },
@@ -40,53 +32,190 @@ export const STATIONS = [
   { id: 'l99Qqgtul0imZWPofLfzyA', name: 'Centurion', lat: -25.85161, lon: 28.1897, order: 6, line: 'north-south' },
   { id: 'hv_Bf87q50W48rwIUwqCTg', name: 'Pretoria', lat: -25.75866, lon: 28.18988, order: 7, line: 'north-south' },
   { id: '_rkqSHvRE0Scvbcsuy0EVw', name: 'Hatfield', lat: -25.74762, lon: 28.23794, order: 8, line: 'north-south' },
-  // Airport Line (Sandton to OR Tambo via Marlboro and Rhodesfield)
-  { id: 'jXU-OlvxukW8wfc7JeVeXw', name: 'Sandton', lat: -26.10858, lon: 28.05693, order: 1, line: 'airport' },
-  { id: 'GqW6XDaSsk-6eFTiiRt46A', name: 'Marlboro', lat: -26.08337, lon: 28.11164, order: 2, line: 'airport' },
+  // Airport Line
   { id: 'nOZz7-NPrEmB2KacALquAA', name: 'Rhodesfield', lat: -26.12732, lon: 28.22461, order: 3, line: 'airport' },
-  { id: 'nsg0gaT4zkWiYlX31c18Ew', name: 'OR Tambo', lat: -26.13225, lon: 28.23127, order: 4, line: 'airport' },
+  { id: 'nsg0gaT4zkWiYlX31c18Ew', name: 'ORTIA', lat: -26.13225, lon: 28.23127, order: 4, line: 'airport', aliases: ['OR Tambo'] },
 ];
 
 // Available lines
 export const LINES = [
-  { id: 'north-south', name: 'North-South Line', description: 'Park ↔ Hatfield', note: 'Transfer at Sandton for Airport Line' },
-  { id: 'airport', name: 'Airport Line', description: 'Sandton ↔ OR Tambo', note: 'Transfer at Sandton for North-South Line' },
+  { id: 'north-south', name: 'North-South Line', description: 'Park ↔ Hatfield' },
+  { id: 'airport', name: 'Airport Line', description: 'Sandton ↔ ORTIA' },
 ];
 
-// Get stations by line
+/**
+ * Load schedule logic from JSON
+ */
+async function loadSchedule() {
+  if (scheduleCache) return scheduleCache;
+  
+  const baseUrl = import.meta.env.BASE_URL || '/';
+  const response = await fetch(`${baseUrl}gautrain_schedules.json`);
+  scheduleCache = await response.json();
+  return scheduleCache;
+}
+
+/**
+ * Get station by name (supports aliases)
+ */
+export function getStationByName(name) {
+  const station = STATIONS.find(s => 
+    s.name.toLowerCase() === name.toLowerCase() || 
+    s.aliases?.some(a => a.toLowerCase() === name.toLowerCase())
+  );
+  return station;
+}
+
+/**
+ * Get stations by line
+ */
 export function getStationsByLine(lineId) {
   return STATIONS.filter(s => s.line === lineId).sort((a, b) => a.order - b.order);
 }
 
-// Sort stations by order for display
-export const STATIONS_SORTED = [...STATIONS].sort((a, b) => a.order - b.order);
-
 /**
- * Get station by name
+ * Check if time is in peak hours
  */
-export function getStationByName(name) {
-  return STATIONS.find(s => s.name.toLowerCase() === name.toLowerCase());
+export function isPeakTime(time) {
+  const hours = time.getHours();
+  const minutes = time.getMinutes();
+  const totalMinutes = hours * 60 + minutes;
+  
+  const morningPeakStart = 6 * 60; // 06:00
+  const morningPeakEnd = 8 * 60 + 30; // 08:30
+  const eveningPeakStart = 15 * 60; // 15:00
+  const eveningPeakEnd = 18 * 60 + 30; // 18:30
+  
+  return (totalMinutes >= morningPeakStart && totalMinutes <= morningPeakEnd) ||
+         (totalMinutes >= eveningPeakStart && totalMinutes <= eveningPeakEnd);
 }
 
 /**
- * Check if API is available
+ * Check if date is weekend or public holiday
  */
-export async function checkApiStatus() {
-  try {
-    const response = await fetch(
-      `${API_BASE_URL}/user-service/api/0/mobile/isLive/1.0.0`,
-      { timeout: 5000 }
-    );
-    const data = await response.json();
-    return data === true;
-  } catch (error) {
-    console.warn('Gautrain API unavailable:', error);
-    return false;
+function isWeekend(date) {
+  const day = date.getDay();
+  return day === 0 || day === 6;
+}
+
+/**
+ * Get frequency in minutes based on schedule and time
+ */
+function getFrequency(schedule, time, dayType) {
+  if (dayType === 'weekend') {
+    // Parse weekend frequency (e.g., "Every 30 minutes (early/late) or 20 minutes (daytime)")
+    const hours = time.getHours();
+    if (hours < 7 || hours >= 19) {
+      return 30; // Early/late
+    }
+    return 20; // Daytime
+  } else {
+    // Weekday - check peak vs off-peak
+    return isPeakTime(time) ? 10 : 20;
   }
 }
 
 /**
- * Plan a journey using the API
+ * Calculate travel time between two stations
+ */
+function calculateTravelTime(stations, fromIndex, toIndex) {
+  let totalMinutes = 0;
+  const start = Math.min(fromIndex, toIndex);
+  const end = Math.max(fromIndex, toIndex);
+  
+  for (let i = start; i < end; i++) {
+    const from = stations[i];
+    const to = stations[i + 1];
+    const key = `${from}-${to}`;
+    const reverseKey = `${to}-${from}`;
+    totalMinutes += TRAVEL_TIMES[key] || TRAVEL_TIMES[reverseKey] || 5; // Default 5 min
+  }
+  
+  return totalMinutes;
+}
+
+/**
+ * Generate train times based on frequency logic
+ */
+function generateTrainTimes(schedule, referenceTime, maxItineraries) {
+  const dayType = isWeekend(referenceTime) ? 'weekend' : 'weekday';
+  const frequency = getFrequency(schedule, referenceTime, dayType);
+  
+  // Parse first train time
+  const firstTrainTime = schedule.first_train_departure || '05:30';
+  const [firstHour, firstMinute] = firstTrainTime.split(':').map(Number);
+  
+  const trains = [];
+  const now = new Date(referenceTime);
+  let currentTime = new Date(now);
+  currentTime.setHours(firstHour, firstMinute, 0, 0);
+  
+  // Generate trains for the day
+  const endOfDay = new Date(now);
+  endOfDay.setHours(23, 59, 59);
+  
+  while (currentTime <= endOfDay && trains.length < 100) {
+    trains.push(new Date(currentTime));
+    currentTime = new Date(currentTime.getTime() + frequency * 60 * 1000);
+  }
+  
+  return trains;
+}
+
+/**
+ * Check API for delays on a specific journey
+ */
+async function checkForDelays(fromStation, toStation, scheduledDeparture) {
+  try {
+    // Call the Gautrain API to check for real-time delays
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 3000);
+    
+    const response = await fetch(
+      `${API_BASE_URL}/journey-service/api/0/mobile/planJourney/1.0.0`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          agencyID: GAUTRAIN_AGENCY_ID,
+          fromLat: fromStation.lat,
+          fromLon: fromStation.lon,
+          toLat: toStation.lat,
+          toLon: toStation.lon,
+          departureTime: scheduledDeparture.toISOString(),
+          maxItineraries: 1,
+        }),
+        signal: controller.signal,
+      }
+    );
+    
+    clearTimeout(timeoutId);
+    
+    if (!response.ok) return null;
+    
+    const data = await response.json();
+    if (data.itineraries && data.itineraries.length > 0) {
+      const itinerary = data.itineraries[0];
+      const apiDeparture = new Date(itinerary.startTime);
+      const delayMinutes = Math.round((apiDeparture - scheduledDeparture) / 60000);
+      
+      return {
+        hasDelay: delayMinutes > 0,
+        delayMinutes,
+        realDeparture: apiDeparture,
+      };
+    }
+    
+    return null;
+  } catch (error) {
+    console.warn('Could not fetch delay info from API:', error.message);
+    return null;
+  }
+}
+
+
+/**
+ * Plan a journey
  * @param {Object} options - Journey options
  * @param {string} options.from - Origin station name
  * @param {string} options.to - Destination station name
@@ -99,254 +228,120 @@ export async function checkApiStatus() {
 export async function planJourney({ from, to, timeType = 'DepartAfter', time = null, timeWindow = null, maxItineraries = 5 }) {
   const fromStation = getStationByName(from);
   const toStation = getStationByName(to);
-
+  
   if (!fromStation || !toStation) {
     throw new Error('Invalid station names');
   }
-
-  // Route to specific handler based on time type
+  
+  const schedules = await loadSchedule();
+  const now = time || new Date();
+  const dayType = isWeekend(now) ? 'Weekends and Public Holidays' : 'Weekdays (Excluding Public Holidays)';
+  
+  // Find matching schedule
+  const matchingSchedules = schedules.filter(s => {
+    const hasFrom = s.stations.some(name => 
+      name === fromStation.name || fromStation.aliases?.includes(name)
+    );
+    const hasTo = s.stations.some(name => 
+      name === toStation.name || toStation.aliases?.includes(name)
+    );
+    return s.schedule_type === dayType && hasFrom && hasTo;
+  });
+  
+  if (matchingSchedules.length === 0) {
+    throw new Error('No schedule found for this route');
+  }
+  
+  // Use the first matching schedule
+  const schedule = matchingSchedules[0];
+  
+  // Find actual station names in schedule
+  const fromName = schedule.stations.find(name => 
+    name === fromStation.name || fromStation.aliases?.includes(name)
+  );
+  const toName = schedule.stations.find(name => 
+    name === toStation.name || toStation.aliases?.includes(name)
+  );
+  
+  const fromIndex = schedule.stations.indexOf(fromName);
+  const toIndex = schedule.stations.indexOf(toName);
+  
+  if (fromIndex === -1 || toIndex === -1) {
+    throw new Error('Stations not found in schedule');
+  }
+  
+  const travelTimeMinutes = calculateTravelTime(schedule.stations, fromIndex, toIndex);
+  
+  // Generate train times
+  const trainTimes = generateTrainTimes(schedule, now, maxItineraries * 2);
+  
+  // Filter based on time type
+  let filteredTrains = [];
+  
   if (timeType === 'DepartWindow' && timeWindow) {
-    return planDepartAtAround({ from, to, fromStation, toStation, timeWindow, maxItineraries });
+    filteredTrains = trainTimes.filter(t => t >= timeWindow.start && t <= timeWindow.end);
+    // Sort by proximity to target
+    filteredTrains.sort((a, b) => {
+      const diffA = Math.abs(a - timeWindow.target);
+      const diffB = Math.abs(b - timeWindow.target);
+      return diffA - diffB;
+    });
   } else if (timeType === 'ArriveBefore' && time) {
-    return planArriveBy({ from, to, fromStation, toStation, time, maxItineraries });
+    filteredTrains = trainTimes.filter(t => {
+      const arrival = new Date(t.getTime() + travelTimeMinutes * 60 * 1000);
+      return t > now && arrival <= time;
+    });
+    filteredTrains.sort((a, b) => b - a); // Latest first
   } else {
-    return planDepartNow({ from, to, fromStation, toStation, maxItineraries });
+    // DepartAfter
+    const buffer = new Date(now.getTime() + 60000); // 1 min buffer
+    filteredTrains = trainTimes.filter(t => t > buffer);
   }
-}
-
-/**
- * DEPART NOW - Show trains departing from now onwards
- * Uses static schedule as primary source (authoritative timetable)
- */
-async function planDepartNow({ from, to, maxItineraries }) {
-  const now = new Date();
   
-  // Use static schedule as primary source
-  return planJourneyStatic({ 
-    from, 
-    to, 
-    timeType: 'DepartAfter', 
-    time: now, 
-    timeWindow: null, 
-    maxItineraries 
-  });
-}
-
-/**
- * DEPART AT AROUND - Show trains within ±30 min of selected time
- * Uses static schedule as primary source (authoritative timetable)
- */
-async function planDepartAtAround({ from, to, timeWindow, maxItineraries }) {
-  // Use static schedule as primary source
-  return planJourneyStatic({ 
-    from, 
-    to, 
-    timeType: 'DepartWindow', 
-    time: timeWindow.target, 
-    timeWindow, 
-    maxItineraries 
-  });
-}
-
-/**
- * ARRIVE BY - Show trains that arrive before the specified time
- * Uses static schedule as primary source (authoritative timetable)
- */
-async function planArriveBy({ from, to, time, maxItineraries }) {
-  // Use static schedule as primary source
-  return planJourneyStatic({ 
-    from, 
-    to, 
-    timeType: 'ArriveBefore', 
-    time, 
-    timeWindow: null, 
-    maxItineraries 
-  });
-}
-
-/**
- * Plan journey using static schedule data (primary source - authoritative timetable)
- */
-async function planJourneyStatic({ from, to, timeType, time, timeWindow, maxItineraries }) {
-  try {
-    const baseUrl = import.meta.env.BASE_URL || '/';
-    const response = await fetch(`${baseUrl}gautrain_schedule.json`);
-    const scheduleData = await response.json();
-    
-    const now = new Date();
-    let referenceDate;
-    
-    if (timeType === 'DepartWindow' && timeWindow) {
-      referenceDate = timeWindow.target;
-    } else if (timeType === 'ArriveBefore' && time) {
-      referenceDate = time;
-    } else {
-      referenceDate = now;
-    }
-    
-    const dayType = isWeekend(referenceDate) ? 'weekend' : 'weekday';
-    
-    // Determine which line to use based on stations
-    const isAirportJourney = AIRPORT_ONLY_STATIONS.includes(from) || AIRPORT_ONLY_STATIONS.includes(to);
-    
-    let trains, direction, lineName;
-    
-    if (isAirportJourney) {
-      // Airport line journey
-      const fromOrder = AIRPORT_STATIONS[from]?.order;
-      const toOrder = AIRPORT_STATIONS[to]?.order;
-      
-      if (!fromOrder || !toOrder) {
-        console.error('Invalid airport stations:', { from, to });
-        return [];
-      }
-      
-      // West to East: Sandton(1) -> OR Tambo(4), so fromOrder < toOrder
-      // East to West: OR Tambo(4) -> Sandton(1), so fromOrder > toOrder
-      direction = fromOrder < toOrder ? 'west_to_east' : 'east_to_west';
-      trains = scheduleData.airport?.[direction]?.[dayType] || [];
-      lineName = 'Airport Line';
-    } else {
-      // North-South line journey
-      const fromOrder = NORTH_SOUTH_STATIONS[from]?.order;
-      const toOrder = NORTH_SOUTH_STATIONS[to]?.order;
-      
-      if (!fromOrder || !toOrder) {
-        console.error('Invalid north-south stations:', { from, to });
-        return [];
-      }
-      
-      // South to North: Park(1) -> Hatfield(8), so fromOrder < toOrder
-      // North to South: Hatfield(8) -> Park(1), so fromOrder > toOrder
-      direction = fromOrder < toOrder ? 'south_to_north' : 'north_to_south';
-      trains = scheduleData.north_south?.[direction]?.[dayType] || [];
-      lineName = 'North-South Line';
-    }
-    
-    console.log('Static schedule:', {
-      from, to,
-      line: isAirportJourney ? 'airport' : 'north-south',
-      direction,
-      dayType,
-      trainsFound: trains.length,
-      timeType
-    });
-
-    // Parse trains into journey objects
-    const validTrains = trains
-      .map(train => {
-        const fromTime = train.times[from];
-        const toTime = train.times[to];
-        
-        if (!fromTime || !toTime) return null;
-
-        const departure = parseScheduleTime(fromTime, referenceDate);
-        const arrival = parseScheduleTime(toTime, referenceDate);
-        const duration = Math.floor((arrival - departure) / 1000); // seconds
-
-        return {
-          id: `static-${train.times[from]}-${Math.random().toString(36).substr(2, 9)}`,
-          departureTime: departure,
-          arrivalTime: arrival,
-          duration,
-          distance: 0,
-          origin: from,
-          destination: to,
-          stops: [],
-          line: lineName,
-          source: 'schedule',
-          is8Car: train.is8Car || false
-        };
-      })
-      .filter(Boolean);
-
-    // Filter by time type
-    let filtered = validTrains;
-    const departureThreshold = new Date(now.getTime() + 60000); // 1 min buffer
-    
-    if (timeType === 'DepartWindow' && timeWindow) {
-      filtered = validTrains.filter(t => 
-        t.departureTime >= timeWindow.start && t.departureTime <= timeWindow.end
-      );
-    } else if (timeType === 'DepartAfter') {
-      filtered = validTrains.filter(t => t.departureTime > departureThreshold);
-    } else if (timeType === 'ArriveBefore') {
-      filtered = validTrains.filter(t => 
-        t.departureTime > departureThreshold && t.arrivalTime <= time
-      );
-    }
-
-    // Sort results
-    filtered.sort((a, b) => {
-      if (timeType === 'DepartWindow' && timeWindow) {
-        // Sort by proximity to target time
-        const diffA = Math.abs(a.departureTime - timeWindow.target);
-        const diffB = Math.abs(b.departureTime - timeWindow.target);
-        return diffA - diffB;
-      } else if (timeType === 'ArriveBefore') {
-        return b.arrivalTime - a.arrivalTime; // Latest arrival first
-      }
-      return a.departureTime - b.departureTime; // Earliest first
-    });
-
-    console.log('Static schedule results:', {
-      validTrains: validTrains.length,
-      afterFilter: filtered.length,
-      returning: Math.min(filtered.length, maxItineraries)
-    });
-
-    return filtered.slice(0, maxItineraries);
-  } catch (error) {
-    console.error('Static schedule failed:', error);
-    return [];
-  }
-}
-
-/**
- * Parse schedule time (HH:MM) into Date object based on reference date
- */
-function parseScheduleTime(timeStr, baseDate) {
-  const [hours, minutes] = timeStr.split(':').map(Number);
-  const date = new Date(baseDate);
-  date.setHours(hours, minutes, 0, 0);
-  return date;
-}
-
-/**
- * Check if date is weekend
- */
-function isWeekend(date) {
-  const day = date.getDay();
-  return day === 0 || day === 6;
-}
-
-/**
- * Calculate fare estimate (simplified - actual fares from API when available)
- */
-export function estimateFare(origin, destination, isPeak = true) {
-  const fromStation = getStationByName(origin);
-  const toStation = getStationByName(destination);
+  // Take only the requested number
+  filteredTrains = filteredTrains.slice(0, maxItineraries);
   
-  if (!fromStation || !toStation) return null;
+  // Convert to itinerary objects and check for delays
+  const itineraries = await Promise.all(
+    filteredTrains.map(async (departureTime) => {
+      const arrivalTime = new Date(departureTime.getTime() + travelTimeMinutes * 60 * 1000);
+      
+      // Check API for delays
+      const delayInfo = await checkForDelays(fromStation, toStation, departureTime);
+      
+      return {
+        id: `scheduled-${departureTime.getTime()}`,
+        departureTime: delayInfo?.realDeparture || departureTime,
+        arrivalTime: new Date(arrivalTime.getTime() + (delayInfo?.delayMinutes || 0) * 60 * 1000),
+        scheduledDeparture: departureTime,
+        duration: travelTimeMinutes * 60, // in seconds
+        distance: 0,
+        origin: from,
+        destination: to,
+        line: schedule.line,
+        source: 'frequency-logic',
+        delay: delayInfo?.delayMinutes || 0,
+        hasDelay: delayInfo?.hasDelay || false,
+      };
+    })
+  );
+  
+  return itineraries;
+}
 
-  // Distance-based fare estimation (simplified)
+/**
+ * Estimate fare between stations
+ */
+export function estimateFare(from, to, isPeak = false) {
+  const fromStation = getStationByName(from);
+  const toStation = getStationByName(to);
+  
+  if (!fromStation || !toStation) return 0;
+  
+  // Simplified fare calculation - adjust based on actual Gautrain fares
   const distance = Math.abs(fromStation.order - toStation.order);
-  const baseFare = 20 + (distance * 5);
-  const peakMultiplier = isPeak ? 1.3 : 1.0;
-  
-  return Math.round(baseFare * peakMultiplier);
+  const baseFare = distance * 8;
+  return isPeak ? Math.round(baseFare * 1.3) : baseFare;
 }
 
-/**
- * Check if time is during peak hours
- */
-export function isPeakTime(date) {
-  const hour = date.getHours();
-  const day = date.getDay();
-  
-  // Weekend is always off-peak
-  if (day === 0 || day === 6) return false;
-  
-  // Weekday peak: 6:00-9:00 and 16:00-19:00
-  return (hour >= 6 && hour < 9) || (hour >= 16 && hour < 19);
-}
+export { isWeekend };
