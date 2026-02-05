@@ -64,7 +64,7 @@ export function NixieCountdown({ departureTime, is8Car }) {
         </div>
         <div className="train-capacity">
           <span className="capacity-label">
-            {is8Car ? '8-CAR TRAIN • 1920 CAPACITY' : '4-CAR TRAIN • 960 CAPACITY'}
+            {is8Car ? '8-CAR TRAIN' : '4-CAR TRAIN'}
           </span>
         </div>
       </div>
