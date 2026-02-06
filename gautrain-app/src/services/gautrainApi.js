@@ -259,9 +259,20 @@ export async function planJourney({ from, to, timeType = 'DepartAfter', time = n
   
   // Convert to itinerary objects and check for delays
   const itineraries = await Promise.all(
-    filteredTrips.map(async (trip) => {
+    filteredTrips.map(async (trip, index) => {
       // Check API for delays
       const delayInfo = await checkForDelays(fromStation, toStation, trip.departureTime);
+      
+      // Build stops array with all intermediate stations
+      const tripData = schedule.trips[allTrips.indexOf(trip)];
+      const stops = schedule.stations.slice(fromIndex, toIndex + 1).map((stationName, i) => {
+        const timeStr = tripData.times[fromIndex + i];
+        const stopTime = parseTime(timeStr, referenceTime);
+        return {
+          name: stationName,
+          departureTime: stopTime,
+        };
+      });
       
       return {
         id: `trip-${trip.departureTime.getTime()}`,
@@ -277,6 +288,7 @@ export async function planJourney({ from, to, timeType = 'DepartAfter', time = n
         delay: delayInfo?.delayMinutes || 0,
         hasDelay: delayInfo?.hasDelay || false,
         is8Car: trip.is8Car,
+        stops: stops,
       };
     })
   );

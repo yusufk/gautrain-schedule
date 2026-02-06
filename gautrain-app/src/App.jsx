@@ -15,6 +15,7 @@ function App() {
   const [itineraries, setItineraries] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [expandedStops, setExpandedStops] = useState({});
 
   // Get stations for selected line
   const stationsForLine = getStationsByLine(selectedLine);
@@ -372,16 +373,49 @@ function App() {
                     </div>
 
                     {itin.stops && itin.stops.length > 2 && (
-                      <details className="stops-details">
-                        <summary>{itin.stops.length} stops</summary>
-                        <ul className="stops-list">
-                          {itin.stops.map((stop, i) => (
-                            <li key={i}>
-                              {stop.name} {stop.departureTime && `• ${formatTime(stop.departureTime)}`}
-                            </li>
-                          ))}
-                        </ul>
-                      </details>
+                      <div className="stops-container">
+                        <button 
+                          className="stops-toggle"
+                          onClick={() => setExpandedStops(prev => ({
+                            ...prev,
+                            [itin.id]: !prev[itin.id]
+                          }))}
+                        >
+                          <span className="stops-icon">{expandedStops[itin.id] ? '▼' : '▶'}</span>
+                          <span>{itin.stops.length} stops</span>
+                        </button>
+                        
+                        {expandedStops[itin.id] && (
+                          <div className="journey-route">
+                            <div className="route-line"></div>
+                            {itin.stops.map((stop, i) => {
+                              const isOrigin = stop.name === origin;
+                              const isDestination = stop.name === destination;
+                              
+                              return (
+                                <div 
+                                  key={i} 
+                                  className={`route-stop ${
+                                    isOrigin ? 'origin' : 
+                                    isDestination ? 'destination' : 
+                                    'intermediate'
+                                  }`}
+                                >
+                                  <div className="stop-marker">
+                                    <div className="stop-dot"></div>
+                                  </div>
+                                  <div className="stop-info">
+                                    <span className="stop-name">{stop.name}</span>
+                                    {stop.departureTime && (
+                                      <span className="stop-time">{formatTime(stop.departureTime)}</span>
+                                    )}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
                     )}
                   </div>
                 );
