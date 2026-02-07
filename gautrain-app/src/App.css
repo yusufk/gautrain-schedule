@@ -791,6 +791,106 @@
   text-decoration: underline;
 }
 
+/* PWA Install Prompt */
+.install-prompt {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  right: 20px;
+  max-width: 500px;
+  margin: 0 auto;
+  z-index: 1001;
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.install-content {
+  background: linear-gradient(135deg, var(--gautrain-blue) 0%, var(--gautrain-blue-light) 100%);
+  padding: 1rem 1.25rem;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 62, 126, 0.4), 0 0 0 3px var(--gautrain-gold);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  color: white;
+}
+
+.install-icon {
+  font-size: 2rem;
+  flex-shrink: 0;
+}
+
+.install-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.install-text strong {
+  font-size: 1rem;
+  color: var(--gautrain-gold);
+}
+
+.install-text span {
+  font-size: 0.875rem;
+  opacity: 0.9;
+}
+
+.install-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.install-btn {
+  padding: 0.625rem 1.25rem;
+  background: var(--gautrain-gold);
+  color: var(--gautrain-dark);
+  border: none;
+  border-radius: 8px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.9rem;
+}
+
+.install-btn:hover {
+  background: #ffc940;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 184, 28, 0.4);
+}
+
+.dismiss-btn {
+  width: 2.5rem;
+  height: 2.5rem;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dismiss-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.05);
+}
+
 /* Animations */
 @keyframes fadeIn {
   from {

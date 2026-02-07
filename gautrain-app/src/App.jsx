@@ -16,10 +16,38 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [expandedStops, setExpandedStops] = useState({});
+  const [deferredPrompt, setDeferredPrompt] = useState(null);
+  const [showInstallPrompt, setShowInstallPrompt] = useState(false);
 
   // Get stations for selected line
   const stationsForLine = getStationsByLine(selectedLine);
   const currentLineInfo = LINES.find(l => l.id === selectedLine);
+
+  // PWA Install Prompt
+  useEffect(() => {
+    const handler = (e) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+      setShowInstallPrompt(true);
+    };
+    
+    window.addEventListener('beforeinstallprompt', handler);
+    
+    return () => window.removeEventListener('beforeinstallprompt', handler);
+  }, []);
+
+  const handleInstallClick = async () => {
+    if (!deferredPrompt) return;
+    
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    
+    if (outcome === 'accepted') {
+      setShowInstallPrompt(false);
+    }
+    
+    setDeferredPrompt(null);
+  };
 
   // Handle calendar reminder download
   const handleAddToCalendar = (origin, destination, departureTime, duration) => {
@@ -427,13 +455,33 @@ function App() {
 
       <footer className="app-footer">
         <p className="footer-links">
-          Built with ❤️ for Gautrain commuters • 
+          Built with ❤️ for a very special Gautrain commuter • 
           <a href="https://github.com/yusufk/gautrain-schedule" target="_blank" rel="noopener noreferrer"> View on GitHub</a>
         </p>
         <p className="footer-disclaimer">
           This application is not affiliated with or endorsed by Gautrain Management Agency or Bombela Operating Company.
         </p>
       </footer>
+      
+      {showInstallPrompt && (
+        <div className="install-prompt">
+          <div className="install-content">
+            <div className="install-icon">📱</div>
+            <div className="install-text">
+              <strong>Install Gautrain App</strong>
+              <span>Get quick access and offline support</span>
+            </div>
+            <div className="install-actions">
+              <button onClick={handleInstallClick} className="install-btn">
+                Install
+              </button>
+              <button onClick={() => setShowInstallPrompt(false)} className="dismiss-btn">
+                ✕
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       
       <ReloadPrompt />
     </div>
