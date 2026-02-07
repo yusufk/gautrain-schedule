@@ -439,6 +439,29 @@
   flex: 1;
 }
 
+.journey-arrow.clickable {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  padding: 0.5rem;
+  border-radius: 12px;
+}
+
+.journey-arrow.clickable:hover {
+  background: rgba(0, 62, 126, 0.05);
+  transform: scale(1.05);
+}
+
+.journey-arrow.clickable:hover .duration {
+  background: #ffecb3;
+  box-shadow: 0 2px 8px rgba(255, 184, 28, 0.2);
+}
+
+.journey-arrow.clickable:hover .arrow {
+  color: var(--gautrain-gold);
+}
+
 .duration {
   font-size: 0.875rem;
   font-weight: 600;
@@ -447,11 +470,19 @@
   padding: 0.25rem 0.75rem;
   border-radius: 12px;
   white-space: nowrap;
+  transition: all 0.2s;
+}
+
+.stops-count {
+  font-size: 0.75rem;
+  color: var(--gautrain-blue);
+  font-weight: 500;
 }
 
 .arrow {
   font-size: 1.5rem;
   color: var(--gautrain-blue);
+  transition: all 0.2s;
 }
 
 /* Journey Details */

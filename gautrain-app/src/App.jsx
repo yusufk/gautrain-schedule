@@ -361,10 +361,22 @@ function App() {
                           <span className="time">{formatTime(itin.departureTime)}</span>
                           <span className="station">{origin}</span>
                         </div>
-                        <div className="journey-arrow">
-                          <div className="duration">{formatDurationSeconds(itin.duration)}</div>
-                          <div className="arrow">→</div>
-                        </div>
+                        <button 
+                          className="journey-arrow clickable"
+                          onClick={() => setExpandedStops(prev => ({
+                            ...prev,
+                            [itin.id]: !prev[itin.id]
+                          }))}
+                          title="Click to view stops"
+                        >
+                          <div className="duration">
+                            {formatDurationSeconds(itin.duration)}
+                            {itin.stops && itin.stops.length > 2 && (
+                              <span className="stops-count"> • {itin.stops.length} stops</span>
+                            )}
+                          </div>
+                          <div className="arrow">{expandedStops[itin.id] ? '▼' : '→'}</div>
+                        </button>
                         <div className="arrival">
                           <span className="time">{formatTime(itin.arrivalTime)}</span>
                           <span className="station">{destination}</span>
@@ -400,21 +412,9 @@ function App() {
                       </button>
                     </div>
 
-                    {itin.stops && itin.stops.length > 2 && (
+                    {itin.stops && itin.stops.length > 2 && expandedStops[itin.id] && (
                       <div className="stops-container">
-                        <button 
-                          className="stops-toggle"
-                          onClick={() => setExpandedStops(prev => ({
-                            ...prev,
-                            [itin.id]: !prev[itin.id]
-                          }))}
-                        >
-                          <span className="stops-icon">{expandedStops[itin.id] ? '▼' : '▶'}</span>
-                          <span>{itin.stops.length} stops</span>
-                        </button>
-                        
-                        {expandedStops[itin.id] && (
-                          <div className="journey-route">
+                        <div className="journey-route">
                             <div className="route-line"></div>
                             {itin.stops.map((stop, i) => {
                               const isOrigin = stop.name === origin;
@@ -442,7 +442,6 @@ function App() {
                               );
                             })}
                           </div>
-                        )}
                       </div>
                     )}
                   </div>
