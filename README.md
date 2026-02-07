@@ -1,30 +1,52 @@
 # Gautrain Journey Planner
 
-A modern, user-friendly web application for planning Gautrain journeys with reverse trip planning capabilities. Built with React and powered by the live Gautrain API.
+A modern Progressive Web App (PWA) for planning Gautrain journeys with real-time schedules, offline support, and smart trip planning. Built with React and featuring a beautiful Gautrain-branded interface.
 
 🚆 **[Live Demo](https://yusufk.github.io/gautrain-schedule/)**
 
 ## Features
 
-- **Reverse Journey Planning**: Enter your desired arrival time and find the latest train you can catch
+### Core Journey Planning
 - **Multiple Time Modes**: 
-  - Depart Now (real-time journey planning)
-  - Depart At (specific departure time)
-  - Arrive By (reverse planning from arrival time)
-- **Live API Integration**: Real-time journey information from Gautrain's official API
-- **Smart Scheduling**: Automatically calculates optimal departure windows for "Arrive By" mode
-- **Fare Estimation**: Distance-based fare calculations with peak/off-peak pricing
-- **Journey Details**: View all intermediate stops, durations, and countdowns
-- **Weekend Support**: Toggle between weekday and weekend schedules
-- **Modern UI**: Gautrain-branded design with responsive mobile layout
-- **Offline Fallback**: Static schedule data when API is unavailable
+  - **Depart Now**: Find the next available trains in real-time
+  - **Depart At Around**: Search within a ±30 minute window of your target time
+  - **Arrive By**: Reverse planning - find trains that get you there on time
+- **Complete Schedule Data**: 421+ trips covering all day service (05:29-21:12+)
+- **Weekend Support**: Automatic detection and scheduling for weekends and public holidays
+- **Both Lines Supported**: 
+  - North-South Line (Park ↔ Hatfield)
+  - Airport Line (Sandton ↔ OR Tambo)
+
+### Smart Features
+- **Live Countdown Display**: LED-style countdown showing hours and minutes until departure
+- **Peak/Off-Peak Detection**: Automatic fare calculation based on time of day
+- **Train Capacity Info**: See if it's an 8-car (1920 capacity) or 4-car (960 capacity) train
+- **Interactive Stops Timeline**: Expandable route visualization showing all intermediate stops with times
+- **Calendar Reminders**: Add departure reminders to your calendar (20 minutes before)
+- **Google Maps Integration**: One-click navigation to origin station
+
+### Progressive Web App (PWA)
+- **Installable**: Add to home screen on mobile and desktop
+- **Offline Support**: Works without internet after first load
+- **Auto-Updates**: Prompts when new versions are available
+- **Custom Icons**: Gautrain-branded app icons (blue, gold, white)
+- **Standalone Mode**: Runs like a native app without browser chrome
+
+### User Experience
+- **Gautrain Brand Design**: Official blue (#003e7e) and gold (#ffb81c) color scheme
+- **Responsive Layout**: Optimized for mobile and desktop
+- **Animated Interactions**: Smooth transitions and hover effects
+- **Smart Validation**: Prevents invalid route selections
+- **Modern UI Components**: Clean cards, buttons, and form elements
 
 ## Tech Stack
 
-- **React 19.2.0**: Modern hooks-based architecture
-- **Vite 7.2.5**: Fast development and optimized builds
-- **date-fns**: Time formatting and manipulation
-- **Gautrain API**: Live journey planning via WhereIsMyTransport platform
+- **React 19.2.0**: Modern hooks-based architecture with concurrent features
+- **Vite 7.2.5**: Lightning-fast development with Rolldown bundler
+- **PWA Plugin**: vite-plugin-pwa for service worker and offline support
+- **date-fns 4.1.0**: Robust time formatting and manipulation
+- **Sharp**: High-quality icon generation for PWA
+- **Vitest**: Unit testing framework
 - **GitHub Pages**: Automated deployment via GitHub Actions
 
 ## Quick Start
@@ -58,45 +80,36 @@ Or push to `main` branch - GitHub Actions will automatically build and deploy.
 
 ```
 gautrain-schedule/
-├── gautrain-app/           # React application
+├── gautrain-app/           # React PWA application
 │   ├── src/
-│   │   ├── services/       # API integration layer
-│   │   │   └── gautrainApi.js
-│   │   ├── utils/          # Time utilities
-│   │   │   └── timeUtils.js
-│   │   ├── App.jsx         # Main component
-│   │   └── App.css         # Gautrain-branded styles
+│   │   ├── components/
+│   │   │   ├── NixieCountdown.jsx    # LED countdown display
+│   │   │   └── ReloadPrompt.jsx      # PWA update prompt
+│   │   ├── services/
+│   │   │   └── gautrainApi.js        # Schedule API with trip logic
+│   │   ├── utils/
+│   │   │   └── timeUtils.js          # Time formatting utilities
+│   │   ├── hooks/
+│   │   │   └── useCountdown.js       # Countdown timer hook
+│   │   ├── App.jsx                   # Main app component
+│   │   ├── App.css                   # Gautrain-branded styles
+│   │   └── main.jsx                  # App entry point
 │   ├── public/
-│   │   └── gautrain_schedule.json  # Offline fallback
-│   └── vite.config.js
-├── data/                   # Legacy schedule data
-│   ├── gautrain_schedule.json
-│   ├── gautrain-viewer.html
-│   └── gautrain_parser.py
+│   │   ├── gautrain_schedules.json   # Complete schedule data (421 trips)
+│   │   ├── icon.svg                  # Source icon (Gautrain branding)
+│   │   ├── icon-192.png              # PWA icon (192×192)
+│   │   ├── icon-512.png              # PWA icon (512×512)
+│   │   └── manifest.json             # PWA manifest
+│   ├── vite.config.js                # Vite + PWA configuration
+│   ├── generate-icons.js             # Icon generation script
+│   └── package.json
+├── data/                   # Schedule data and utilities
+│   ├── gautrain_schedules.json       # Master schedule file
+│   ├── gautrain-viewer.html          # Legacy HTML viewer
+│   └── gautrain_parser.py            # Schedule extraction tool
 └── .github/workflows/
-    └── deploy.yml          # Automated deployment
+    └── deploy.yml          # Automated CI/CD pipeline
 ```
-
-## API Integration
-
-The app uses the Gautrain Transport API (powered by WhereIsMyTransport):
-
-- **Stops API**: Fetches all Gautrain stations with coordinates
-- **Journey API**: Creates journey itineraries between stations
-- **Live Status**: Checks API availability
-
-### Smart "Arrive By" Logic
-
-When planning by arrival time, the app:
-1. Calculates a 1-hour departure window before the target arrival
-2. Requests 20 journey options from the API
-3. Filters results to only show trains arriving ≤ target time
-4. Sorts by latest departure first (giving you maximum flexibility)
-5. Returns the top 5 options
-
-## Gautrain Network
-
-Currently supports the North-South Line with 8 stations:
 
 - Park Station
 - Rosebank
