@@ -440,26 +440,53 @@
 }
 
 .journey-arrow.clickable {
-  background: transparent;
-  border: none;
+  background: rgba(0, 62, 126, 0.02);
+  border: 1px solid transparent;
   cursor: pointer;
-  transition: all 0.2s;
-  padding: 0.5rem;
+  transition: all 0.3s ease;
+  padding: 0.75rem;
   border-radius: 12px;
+  position: relative;
+}
+
+.journey-arrow.clickable::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  border: 2px solid transparent;
+  background: linear-gradient(135deg, rgba(0, 62, 126, 0.1), rgba(255, 184, 28, 0.1)) border-box;
+  -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.3s ease;
 }
 
 .journey-arrow.clickable:hover {
   background: rgba(0, 62, 126, 0.05);
-  transform: scale(1.05);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 62, 126, 0.12);
+}
+
+.journey-arrow.clickable:hover::before {
+  opacity: 1;
 }
 
 .journey-arrow.clickable:hover .duration {
-  background: #ffecb3;
-  box-shadow: 0 2px 8px rgba(255, 184, 28, 0.2);
+  background: var(--gautrain-gold);
+  color: white;
+  transform: scale(1.05);
+  box-shadow: 0 2px 8px rgba(255, 184, 28, 0.4);
 }
 
 .journey-arrow.clickable:hover .arrow {
   color: var(--gautrain-gold);
+  transform: scale(1.3) rotate(90deg);
+}
+
+.journey-arrow.clickable:active {
+  transform: translateY(0);
 }
 
 .duration {
@@ -470,7 +497,23 @@
   padding: 0.25rem 0.75rem;
   border-radius: 12px;
   white-space: nowrap;
-  transition: all 0.2s;
+  transition: all 0.3s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.arrow {
+  transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  font-size: 1.2rem;
+  color: var(--gautrain-blue);
+  opacity: 0.7;
+  display: inline-block;
+}
+
+.stops-count {
+  font-size: 0.7rem;
+  color: var(--gautrain-blue);
+  font-weight: 500;
+  opacity: 0.8;
 }
 
 .stops-count {
@@ -571,6 +614,16 @@
 
 /* Stops Container */
 .stops-container {
+  margin-top: 1rem;
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transition: max-height 0.4s ease-out, opacity 0.3s ease-out, margin-top 0.4s ease-out;
+}
+
+.stops-container.expanded {
+  max-height: 1000px;
+  opacity: 1;
   margin-top: 1rem;
 }
 

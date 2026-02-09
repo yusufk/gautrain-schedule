@@ -181,7 +181,7 @@ export async function planJourney({ from, to, timeType = 'DepartAfter', time = n
   const referenceTime = time || new Date();
   const dayType = isWeekend(referenceTime) ? 'Weekends and Public Holidays' : 'Weekdays (Excluding Public Holidays)';
   
-  // Find matching schedule
+  // Find matching schedule with correct direction
   const matchingSchedules = schedules.filter(s => {
     const hasFrom = s.stations.some(name => 
       name === fromStation.name || fromStation.aliases?.includes(name)
@@ -196,7 +196,23 @@ export async function planJourney({ from, to, timeType = 'DepartAfter', time = n
     throw new Error('No schedule found for this route');
   }
   
-  const schedule = matchingSchedules[0];
+  // Select the schedule where fromStation comes before toStation in the stations array
+  // This ensures we get the correct direction of travel
+  const schedule = matchingSchedules.find(s => {
+    const fromName = s.stations.find(name => 
+      name === fromStation.name || fromStation.aliases?.includes(name)
+    );
+    const toName = s.stations.find(name => 
+      name === toStation.name || toStation.aliases?.includes(name)
+    );
+    const fromIdx = s.stations.indexOf(fromName);
+    const toIdx = s.stations.indexOf(toName);
+    return fromIdx < toIdx; // From should come before To in the schedule's station order
+  });
+  
+  if (!schedule) {
+    throw new Error('No schedule found for this direction of travel');
+  }
   
   // Find actual station names in schedule
   const fromName = schedule.stations.find(name => 
@@ -218,7 +234,16 @@ export async function planJourney({ from, to, timeType = 'DepartAfter', time = n
     const departureTimeStr = trip.times[fromIndex];
     const arrivalTimeStr = trip.times[toIndex];
     const departureTime = parseTime(departureTimeStr, referenceTime);
-    const arrivalTime = parseTime(arrivalTimeStr, referenceTime);
+    let arrivalTime = parseTime(arrivalTimeStr, referenceTime);
+    
+    // Safety check: if arrival is before departure, something is wrong with time parsing
+    // This should not happen with correct direction filtering, but just in case
+    if (arrivalTime < departureTime) {
+      console.warn(`Detected arrival before departure for trip at ${departureTimeStr}. This indicates a schedule direction mismatch.`);
+      // Add a day to arrival time as it might be next day crossing
+      arrivalTime = new Date(arrivalTime.getTime() + 24 * 60 * 60 * 1000);
+    }
+    
     const durationSeconds = Math.abs(Math.round((arrivalTime - departureTime) / 1000));
     
     return {

@@ -367,7 +367,9 @@ function App() {
                             ...prev,
                             [itin.id]: !prev[itin.id]
                           }))}
-                          title="Click to view stops"
+                          title={expandedStops[itin.id] ? "Hide stops" : "Show stops"}
+                          aria-label={expandedStops[itin.id] ? "Hide stops" : "Show stops"}
+                          aria-expanded={expandedStops[itin.id]}
                         >
                           <div className="duration">
                             {formatDurationSeconds(itin.duration)}
@@ -375,7 +377,7 @@ function App() {
                               <span className="stops-count"> • {itin.stops.length} stops</span>
                             )}
                           </div>
-                          <div className="arrow">{expandedStops[itin.id] ? '▼' : '→'}</div>
+                          <div className="arrow">{expandedStops[itin.id] ? '▲' : '▼'}</div>
                         </button>
                         <div className="arrival">
                           <span className="time">{formatTime(itin.arrivalTime)}</span>
@@ -412,8 +414,8 @@ function App() {
                       </button>
                     </div>
 
-                    {itin.stops && itin.stops.length > 2 && expandedStops[itin.id] && (
-                      <div className="stops-container">
+                    {itin.stops && itin.stops.length > 2 && (
+                      <div className={`stops-container ${expandedStops[itin.id] ? 'expanded' : ''}`}>
                         <div className="journey-route">
                             <div className="route-line"></div>
                             {itin.stops.map((stop, i) => {

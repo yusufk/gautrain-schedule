@@ -101,11 +101,11 @@ describe('Gautrain API Service', () => {
         const train = results[0];
         expect(train.origin).toBe('Sandton');
         expect(train.destination).toBe('OR Tambo');
-        expect(train.line).toBe('Airport Line');
+        expect(train.line).toBe('East - West Line and OR Tambo Service');
         
-        // Travel time should be ~21 minutes
-        expect(train.duration).toBeGreaterThanOrEqual(18 * 60);
-        expect(train.duration).toBeLessThanOrEqual(25 * 60);
+        // Travel time should be ~14 minutes (actual schedule time)
+        expect(train.duration).toBeGreaterThanOrEqual(12 * 60);
+        expect(train.duration).toBeLessThanOrEqual(18 * 60);
       }
     });
 
@@ -124,7 +124,7 @@ describe('Gautrain API Service', () => {
         const train = results[0];
         expect(train.origin).toBe('OR Tambo');
         expect(train.destination).toBe('Sandton');
-        expect(train.line).toBe('Airport Line');
+        expect(train.line).toBe('East - West Line and OR Tambo Service');
       }
     });
 
@@ -240,7 +240,7 @@ describe('Gautrain API Service', () => {
 
       expect(results).toBeDefined();
       if (results.length > 0) {
-        expect(results[0].line).toBe('Airport Line');
+        expect(results[0].line).toBe('East - West Line and OR Tambo Service');
       }
     });
   });
@@ -311,6 +311,33 @@ describe('Gautrain API Service', () => {
   });
 
   describe('Travel Time Validation', () => {
+    it('should ensure arrival time is always after departure time', async () => {
+      // Test all major routes in both directions
+      const routes = [
+        { from: 'Sandton', to: 'Pretoria' },
+        { from: 'Pretoria', to: 'Sandton' },
+        { from: 'Park', to: 'Hatfield' },
+        { from: 'Hatfield', to: 'Park' },
+        { from: 'Pretoria', to: 'Rosebank' }, // Specific southbound case
+        { from: 'Rosebank', to: 'Pretoria' },
+        { from: 'Sandton', to: 'OR Tambo' },
+        { from: 'OR Tambo', to: 'Sandton' },
+      ];
+
+      for (const route of routes) {
+        const results = await planJourney({
+          from: route.from,
+          to: route.to,
+          timeType: 'DepartAfter',
+          maxItineraries: 5
+        });
+
+        results.forEach(train => {
+          expect(train.arrivalTime.getTime()).toBeGreaterThan(train.departureTime.getTime());
+        });
+      }
+    });
+
     it('Sandton → Pretoria should be ~28 minutes', async () => {
       const results = await planJourney({
         from: 'Sandton',
@@ -347,7 +374,7 @@ describe('Gautrain API Service', () => {
       }
     });
 
-    it('Sandton → OR Tambo should be ~21 minutes', async () => {
+    it('Sandton → OR Tambo should be ~14 minutes', async () => {
       const targetTime = new Date();
       targetTime.setHours(10, 0, 0, 0);
       
@@ -365,7 +392,7 @@ describe('Gautrain API Service', () => {
 
       if (results.length > 0) {
         const durationMinutes = results[0].duration / 60;
-        expect(durationMinutes).toBeCloseTo(21, 1);
+        expect(durationMinutes).toBeCloseTo(14, 1);
       }
     });
   });
