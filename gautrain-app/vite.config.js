@@ -8,7 +8,10 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['gautrain_schedule.json'],
+      devOptions: {
+        enabled: true
+      },
+      includeAssets: ['gautrain_schedules.json'],
       manifest: {
         name: 'Gautrain Journey Planner',
         short_name: 'Gautrain',

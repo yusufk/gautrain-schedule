@@ -1,0 +1,131 @@
+/* PWA Update Prompt - Gautrain Themed */
+.reload-prompt-container {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  left: 20px;
+  max-width: 400px;
+  margin: 0 auto;
+  z-index: 9999;
+  animation: slideUp 0.4s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(100px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.reload-prompt-content {
+  background: linear-gradient(135deg, var(--gautrain-blue) 0%, var(--gautrain-blue-light) 100%);
+  padding: 1.25rem;
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3), 0 0 0 3px var(--gautrain-gold);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  color: white;
+  backdrop-filter: blur(10px);
+}
+
+.reload-prompt-icon {
+  font-size: 2rem;
+  flex-shrink: 0;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+.reload-prompt-text {
+  flex: 1;
+  font-size: 0.9rem;
+  line-height: 1.4;
+}
+
+.reload-prompt-text strong {
+  font-size: 1rem;
+  color: var(--gautrain-gold);
+}
+
+.reload-prompt-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.reload-btn {
+  padding: 0.625rem 1.25rem;
+  background: var(--gautrain-gold);
+  color: var(--gautrain-blue);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 0.875rem;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.reload-btn:hover {
+  background: #ffc942;
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(255, 184, 28, 0.4);
+}
+
+.reload-btn:active {
+  transform: scale(0.98);
+}
+
+.close-btn {
+  padding: 0.625rem 1rem;
+  background: transparent;
+  color: white;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.875rem;
+  transition: all 0.3s ease;
+}
+
+.close-btn:hover {
+  border-color: rgba(255, 255, 255, 0.8);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Mobile responsive */
+@media (max-width: 640px) {
+  .reload-prompt-container {
+    bottom: 10px;
+    right: 10px;
+    left: 10px;
+  }
+  
+  .reload-prompt-content {
+    padding: 1rem;
+    flex-wrap: wrap;
+  }
+  
+  .reload-prompt-actions {
+    width: 100%;
+    margin-top: 0.5rem;
+  }
+  
+  .reload-btn,
+  .close-btn {
+    flex: 1;
+  }
+}

@@ -18,6 +18,8 @@ function App() {
   const [expandedStops, setExpandedStops] = useState({});
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [showInstallPrompt, setShowInstallPrompt] = useState(false);
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
 
   // Get stations for selected line
   const stationsForLine = getStationsByLine(selectedLine);
@@ -49,18 +51,49 @@ function App() {
     setDeferredPrompt(null);
   };
 
-  // Handle calendar reminder download
+  // Handle calendar reminder download - iOS compatible
   const handleAddToCalendar = (origin, destination, departureTime, duration) => {
     const icsContent = generateICSContent(origin, destination, departureTime, duration);
-    const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `gautrain-${origin}-${destination}.ics`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    
+    // Detect iOS/Safari
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+                  (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+    
+    try {
+      if (isIOS || isSafari) {
+        // iOS/Safari: Use data URL which works better
+        const dataUrl = `data:text/calendar;charset=utf-8,${encodeURIComponent(icsContent)}`;
+        const link = document.createElement('a');
+        link.href = dataUrl;
+        link.download = `gautrain-${origin}-${destination}.ics`;
+        link.setAttribute('target', '_blank');
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } else {
+        // Other browsers: Use blob URL
+        const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `gautrain-${origin}-${destination}.ics`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      }
+      
+      // Show success toast
+      setToastMessage('✅ Reminder file downloaded! Open it to add to your calendar.');
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 5000);
+    } catch (error) {
+      console.error('Error adding to calendar:', error);
+      setToastMessage('⚠️ Could not download reminder. Please try again.');
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 5000);
+    }
   };
 
 
@@ -485,6 +518,12 @@ function App() {
       )}
       
       <ReloadPrompt />
+      
+      {showToast && (
+        <div className="toast-notification">
+          {toastMessage}
+        </div>
+      )}
     </div>
   );
 }

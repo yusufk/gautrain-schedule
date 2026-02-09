@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import './ReloadPrompt.css';
 import { useRegisterSW } from 'virtual:pwa-register/react';
 
 function ReloadPrompt() {
@@ -8,10 +8,16 @@ function ReloadPrompt() {
     updateServiceWorker,
   } = useRegisterSW({
     onRegistered(r) {
-      console.log('SW Registered: ' + r);
+      console.log('SW Registered:', r);
+      // Check for updates every hour
+      if (r) {
+        setInterval(() => {
+          r.update();
+        }, 60 * 60 * 1000);
+      }
     },
     onRegisterError(error) {
-      console.log('SW registration error', error);
+      console.error('SW registration error:', error);
     },
   });
 
@@ -23,62 +29,34 @@ function ReloadPrompt() {
   if (!offlineReady && !needRefresh) return null;
 
   return (
-    <div style={{
-      position: 'fixed',
-      bottom: '20px',
-      right: '20px',
-      left: '20px',
-      maxWidth: '400px',
-      margin: '0 auto',
-      padding: '16px',
-      background: '#16213e',
-      border: '2px solid #e94560',
-      borderRadius: '8px',
-      boxShadow: '0 4px 6px rgba(0, 0, 0, 0.3)',
-      zIndex: 1000,
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '12px'
-    }}>
-      <div style={{ color: '#fff' }}>
-        {offlineReady ? (
-          <span>App ready to work offline</span>
-        ) : (
-          <span>New content available, click reload to update.</span>
-        )}
-      </div>
-      <div style={{ display: 'flex', gap: '8px' }}>
-        {needRefresh && (
+    <div className="reload-prompt-container">
+      <div className="reload-prompt-content">
+        <div className="reload-prompt-icon">
+          {offlineReady ? '✅' : '🔄'}
+        </div>
+        <div className="reload-prompt-text">
+          {offlineReady ? (
+            <span>App ready to work offline</span>
+          ) : (
+            <span><strong>Update Available!</strong><br/>New version ready to install</span>
+          )}
+        </div>
+        <div className="reload-prompt-actions">
+          {needRefresh && (
+            <button
+              onClick={() => updateServiceWorker(true)}
+              className="reload-btn"
+            >
+              Update Now
+            </button>
+          )}
           <button
-            onClick={() => updateServiceWorker(true)}
-            style={{
-              flex: 1,
-              padding: '8px 16px',
-              background: '#e94560',
-              color: '#fff',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer',
-              fontWeight: 'bold'
-            }}
+            onClick={close}
+            className="close-btn"
           >
-            Reload
+            {needRefresh ? 'Later' : 'Close'}
           </button>
-        )}
-        <button
-          onClick={close}
-          style={{
-            flex: 1,
-            padding: '8px 16px',
-            background: 'transparent',
-            color: '#fff',
-            border: '1px solid #fff',
-            borderRadius: '4px',
-            cursor: 'pointer'
-          }}
-        >
-          Close
-        </button>
+        </div>
       </div>
     </div>
   );

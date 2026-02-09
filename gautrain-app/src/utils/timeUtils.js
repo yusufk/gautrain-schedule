@@ -114,6 +114,7 @@ export function getCalendarUrl(origin, destination, departureTime, duration) {
 
 /**
  * Generate webcal ICS file content for device-neutral calendar import
+ * iOS and Calendar app compatible
  */
 export function generateICSContent(origin, destination, departureTime, duration) {
   const reminderTime = new Date(departureTime);
@@ -129,24 +130,33 @@ export function generateICSContent(origin, destination, departureTime, duration)
     return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
   };
   
+  // Generate unique ID for the event
+  const eventId = `gautrain-${departureTime.getTime()}-${origin}-${destination}@gautrain-schedule.app`;
+  const now = new Date();
+  
   const icsContent = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
     'PRODID:-//Gautrain Schedule//EN',
     'CALSCALE:GREGORIAN',
+    'METHOD:PUBLISH',
     'BEGIN:VEVENT',
+    `UID:${eventId}`,
+    `DTSTAMP:${formatICSDate(now)}`,
     `DTSTART:${formatICSDate(reminderTime)}`,
     `DTEND:${formatICSDate(arrivalTime)}`,
     `SUMMARY:${title}`,
-    `DESCRIPTION:${description}`,
+    `DESCRIPTION:${description.replace(/\n/g, '\\n')}`,
+    'STATUS:CONFIRMED',
+    'SEQUENCE:0',
     'BEGIN:VALARM',
     'TRIGGER:-PT0M',
     'ACTION:DISPLAY',
-    `DESCRIPTION:${title}`,
+    `DESCRIPTION:Time to leave for ${origin} station!`,
     'END:VALARM',
     'END:VEVENT',
     'END:VCALENDAR'
-  ].join('\\r\\n');
+  ].join('\r\n');
   
   return icsContent;
 }
